@@ -43,3 +43,9 @@
 首页仅保留今日待学摘要、当前牌组的学习入口和牌组列表，移除插画、热力图、侧边统计及宣传文字；首页侧栏不再重复列出牌组。每行合并显示待学数量，细分队列仍在牌组详情中查看。当前牌组由上游选择状态提供，主按钮明确传递该牌组。
 
 `qt/tools/check_readability.py` 在 1200×800、900×650 和 400×740 的独立人工资料库副本中检查字号、首页精简、首屏学习入口和按钮边界，共 12 项；原有 27 项回归检查同时通过。
+
+### 原生窗口标题栏
+
+主窗口通过 AppKit 的 `titlebarAppearsTransparent`、`backgroundColor` 和 `titlebarSeparatorStyle` 与页面画布统一。保持原生标题、红黄绿按钮与窗口样式，不扩展网页到标题栏区域。仅在 macOS 初始化，随主题切换、窗口显示和窗口状态变化重新应用；通过系统自带 Objective-C runtime 调用，不新增打包依赖。参考 [Apple 标题栏接口](https://developer.apple.com/documentation/appkit/nswindow/titlebarappearstransparent)。
+
+`qt/tools/check_macos_titlebar.py` 使用独立人工资料库副本，检查深浅色下的原生窗口、标题栏颜色与分隔线、窗口样式和三个系统按钮，共 18 项；保存含系统标题栏的完整窗口截图，已检查两种主题的实际衔接效果。

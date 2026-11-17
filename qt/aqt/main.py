@@ -1757,6 +1757,9 @@ title="{}" {}>{}</button>""".format(
             self.hideMenuAccels = True
             self.maybeHideAccelerators()
             self.hideStatusTips()
+            from aqt.macos_window import MainWindowTitlebar
+
+            self._macos_titlebar = MainWindowTitlebar(self)
 
     def maybeHideAccelerators(self, tgt: Any | None = None) -> None:
         if not self.hideMenuAccels:

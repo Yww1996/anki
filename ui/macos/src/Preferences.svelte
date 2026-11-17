@@ -15,6 +15,7 @@
   } from '@lucide/svelte';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
+  import SelectField from '$lib/SelectField.svelte';
   import { Switch } from '$lib/components/ui/switch';
   interface Item {
     id: string;
@@ -155,17 +156,7 @@
                         disabled={item.disabled}
                         onCheckedChange={(value) => request('change', { id: item.id, value })}
                       />
-                    {:else if item.type === 'select'}<select
-                        id={item.id}
-                        aria-label={item.label}
-                        disabled={item.disabled}
-                        value={Number(item.value)}
-                        onchange={(e) =>
-                          request('change', { id: item.id, value: Number(e.currentTarget.value) })}
-                        >{#each item.options || [] as option}<option value={option.value}
-                            >{option.label}</option
-                          >{/each}</select
-                      >
+                    {:else if item.type === 'select'}<SelectField id={item.id} label={item.label} disabled={item.disabled} value={String(item.value)} options={(item.options||[]).map(option=>({value:String(option.value),label:option.label}))} onValueChange={value=>request('change',{id:item.id,value:Number(value)})}/>
                     {:else if item.type === 'number'}<Input
                         id={item.id}
                         aria-label={item.label}

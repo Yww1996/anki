@@ -20,8 +20,12 @@ class HomeActions(RegressionChecks):
         self.later(self.select, 800)
 
     def select(self):
+        aqt.mw.web.eval("document.querySelector('.split-mobile-picker button').click()")
+        self.later(self.choose)
+
+    def choose(self):
         aqt.mw.web.eval(
-            "(()=>{const s=document.querySelector('.split-mobile-picker select');s.value=s.options[1].value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+            "(()=>{const o=document.querySelectorAll('.modern-select-option')[1];o.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'mouse',button:0}));o.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'mouse',button:0}));})()"
         )
         self.later(self.selected)
 
@@ -45,7 +49,7 @@ class HomeActions(RegressionChecks):
         self.evaluate(
             aqt.mw.web,
             "selecting a row keeps the home and selects that row",
-            "document.querySelector('.split-focus h1').textContent===document.querySelector('.split-mobile-picker select').selectedOptions[0].textContent && !!document.querySelector('.home-page')",
+            "document.querySelector('.split-focus h1').textContent===document.querySelector('.split-mobile-picker button span').textContent && !!document.querySelector('.home-page')",
             self.sync,
         )
 

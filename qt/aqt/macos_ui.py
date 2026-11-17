@@ -79,6 +79,9 @@ QComboBox, QSpinBox, QDoubleSpinBox, QDateTimeEdit {{
 QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus {{ border-color: {accent}; }}
 QComboBox:disabled, QSpinBox:disabled, QDoubleSpinBox:disabled {{ color: {secondary}; }}
 QComboBox {{ padding-right: 25px; }}
+QComboBox QAbstractItemView {{ background-color: {surface}; color: {text};
+    selection-background-color: {selection}; selection-color: {text};
+    border: 1px solid {border}; border-radius: 8px; padding: 4px; }}
 QComboBox::drop-down {{ border: none; width: 24px; background: transparent; }}
 QComboBox::down-arrow {{ image: url("{down_icon}"); width: 13px; height: 13px; }}
 QSpinBox::up-button, QDoubleSpinBox::up-button,
@@ -291,6 +294,9 @@ body.isMac:not(.card) :is(.card, .modal-content, .popover, .dropdown-menu) {
     --bs-dropdown-color: var(--mac-text);
     --bs-dropdown-link-color: var(--mac-text);
     --bs-dropdown-link-hover-bg: var(--mac-selection);
+    --bs-dropdown-link-hover-color: var(--mac-text);
+    --bs-dropdown-link-active-bg: var(--mac-selection);
+    --bs-dropdown-link-active-color: var(--mac-text);
     border-radius: 10px;
     border-color: var(--mac-border);
 }

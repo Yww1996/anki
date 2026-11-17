@@ -3280,3 +3280,22 @@ body.hidden .review-header {
  .split-focus h1 { font-size:24px; }
  .split-counts { gap:30px; }
 }
+/* Shared selection controls: trigger and expanded list use the same app tokens. */
+.modern-select-trigger { display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:38px;width:100%;min-width:0;padding:8px 12px;border:1px solid var(--input);border-radius:8px;background:var(--card);color:var(--foreground);font-size:15px;text-align:left; }
+.modern-select-trigger > span:first-child { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.modern-select-trigger > svg { flex-shrink:0;color:var(--muted-foreground); }
+.modern-select-trigger:hover:not(:disabled) { border-color:var(--muted-foreground); }
+.modern-select-trigger:focus-visible,.modern-select-trigger[data-state='open'] { outline:2px solid color-mix(in srgb,var(--ring) 40%,transparent);outline-offset:2px; }
+.modern-select-trigger:disabled { opacity:.5;cursor:default; }
+.modern-select-content { z-index:100;box-sizing:border-box;width:max(240px,var(--bits-select-anchor-width));min-width:120px;max-width:calc(100vw - 24px);max-height:min(320px,var(--bits-select-content-available-height,320px));overflow-y:auto;overflow-x:hidden;padding:5px;border:1px solid var(--border);border-radius:10px;background:var(--popover,var(--card));color:var(--popover-foreground,var(--foreground));box-shadow:0 10px 28px #0002;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif; }
+.modern-select-option { display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:36px;padding:8px 10px;border-radius:6px;font-size:15px;line-height:1.5;cursor:default;outline:none;user-select:none; }
+.modern-select-option > span:first-child { min-width:0;overflow-wrap:anywhere; }
+.modern-select-option[data-highlighted] { background:var(--accent);color:var(--accent-foreground); }
+.modern-select-option[data-disabled] { opacity:.45;pointer-events:none; }
+.modern-select-check { width:16px;flex-shrink:0;color:var(--primary); }
+.split-mobile-picker .modern-select-trigger { min-height:40px; }
+.preferences-row-control .modern-select-trigger { max-width:250px; }
+.live-deck-filter.modern-select-trigger { width:190px; }
+[data-slot='dropdown-menu-content'],[data-slot='dropdown-menu-sub-content'] { border:1px solid var(--border);background:var(--popover,var(--card));color:var(--popover-foreground,var(--foreground));border-radius:10px;box-shadow:0 10px 28px #0002; }
+@media(max-width:660px){.live-deck-filter.modern-select-trigger{width:140px}}
+:root:not(.dark) { --popover:var(--card);--popover-foreground:var(--foreground); }

@@ -31,6 +31,7 @@
   import * as Menu from '$lib/components/ui/dropdown-menu';
   import NavButton from '$lib/NavButton.svelte';
   import DeckIcon from '$lib/DeckIcon.svelte';
+  import SelectField from '$lib/SelectField.svelte';
   import { command, type Home, type Card } from '$lib/bridge';
   let home: Home = $state({
     decks: [],
@@ -389,7 +390,7 @@
       {:else if page === 'home'}
         <section class="home-page native-split-page page-content">
           {#if currentDeck}
-          <label class="split-mobile-picker"><span>当前牌组</span><select aria-label="选择牌组" value={currentDeck.id} onchange={(event) => (chosenDeckId=event.currentTarget.value)}>{#each home.decks as deck}<option value={deck.id}>{deck.name}</option>{/each}</select></label>
+          <label class="split-mobile-picker"><span>当前牌组</span><SelectField label="选择牌组" value={currentDeck.id} options={home.decks.map(deck=>({value:deck.id,label:deck.name}))} onValueChange={value=>(chosenDeckId=value)}/></label>
           <div class="split-focus">
             <span class="split-deck-emblem"><BookOpen size={28}/></span>
             <p class="split-caption">当前牌组</p>
@@ -440,11 +441,8 @@
                       >未学习</Tabs.Trigger
                     ></Tabs.List
                   ></Tabs.Root
-                ><select class="live-deck-filter" aria-label="筛选牌组" bind:value={deckId}
-                  ><option value="all">全部牌组</option>{#each home.decks as deck}<option
-                      value={deck.id}>{deck.name}</option
-                    >{/each}</select
-                >
+                ><SelectField class="live-deck-filter" label="筛选牌组" bind:value={deckId} options={[{value:'all',label:'全部牌组'},...home.decks.map(deck=>({value:deck.id,label:deck.name}))]}/>
+
               </div>
               <div class="card-table-wrap">
                 <Table.Root class="card-data-table"

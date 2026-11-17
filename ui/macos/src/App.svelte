@@ -17,7 +17,6 @@
     MoreHorizontal,
     RefreshCw,
     Download,
-    CalendarDays,
     Pencil,
     X,
   } from '@lucide/svelte';
@@ -57,11 +56,12 @@
   let revision = 0;
   const selected = $derived(cards.find((c) => c.id === selectedId));
   const due = $derived(home.new + home.learning + home.review);
-  const today = new Intl.DateTimeFormat('zh-CN', {
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
-  }).format(new Date());
+  const currentDeck = $derived(
+    home.decks.find((deck) => deck.id === home.currentDeckId) || home.decks[0],
+  );
+  const currentDue = $derived(
+    currentDeck ? currentDeck.new + currentDeck.learning + currentDeck.review : 0,
+  );
   async function act(action: string, args = {}) {
     error = '';
     try {
@@ -192,7 +192,9 @@
                   void refresh(true);
                 }}
                 class="main-nav-button"
-                ><House /><span>今日学习</span><span class="nav-count">{due}</span></NavButton
+                ><House /><span>今日学习</span>{#if page !== 'home'}<span class="nav-count"
+                    >{due}</span
+                  >{/if}</NavButton
               ></Sidebar.MenuItem
             >
             <Sidebar.MenuItem
@@ -211,26 +213,26 @@
           </Sidebar.Menu></Sidebar.GroupContent
         ></Sidebar.Group
       >
-      <Sidebar.Group class="sidebar-deck-group"
-        ><Sidebar.GroupLabel class="sidebar-group-heading"
-          >我的牌组<button class="sidebar-add" aria-label="新建牌组" onclick={() => act('create')}
-            ><Plus size={14} /></button
-          ></Sidebar.GroupLabel
-        ><Sidebar.GroupContent
-          ><Sidebar.Menu
-            >{#each home.decks as deck}<Sidebar.MenuItem
-                ><NavButton
-                  isActive={(page === 'cards' && deckId === deck.id) ||
-                    (page === 'overview' && home.overview?.id === deck.id)}
-                  onclick={() => browse(deck.id)}
-                  class="deck-nav-button"
-                  ><DeckIcon {deck} small /><span>{deck.name}</span></NavButton
-                ></Sidebar.MenuItem
-              >{/each}</Sidebar.Menu
-          ></Sidebar.GroupContent
-        ></Sidebar.Group
-      >
-      <div class="sidebar-tip"><p>每天留一点时间，<br />给值得记住的事。</p></div></Sidebar.Content
+      {#if page !== 'home'}<Sidebar.Group class="sidebar-deck-group"
+          ><Sidebar.GroupLabel class="sidebar-group-heading"
+            >我的牌组<button class="sidebar-add" aria-label="新建牌组" onclick={() => act('create')}
+              ><Plus size={14} /></button
+            ></Sidebar.GroupLabel
+          ><Sidebar.GroupContent
+            ><Sidebar.Menu
+              >{#each home.decks as deck}<Sidebar.MenuItem
+                  ><NavButton
+                    isActive={(page === 'cards' && deckId === deck.id) ||
+                      (page === 'overview' && home.overview?.id === deck.id)}
+                    onclick={() => browse(deck.id)}
+                    class="deck-nav-button"
+                    ><DeckIcon {deck} small /><span>{deck.name}</span></NavButton
+                  ></Sidebar.MenuItem
+                >{/each}</Sidebar.Menu
+            ></Sidebar.GroupContent
+          ></Sidebar.Group
+        >
+      {/if}</Sidebar.Content
     >
     <Sidebar.Footer class="app-sidebar-footer"
       ><Sidebar.Menu
@@ -242,7 +244,7 @@
       >
       <div class="workspace-profile">
         <span class="workspace-avatar"><BookOpen size={18} /></span><span
-          ><strong>{home.profile || 'Anki'}</strong><small>本机资料库</small></span
+          ><strong>{home.profile || 'Anki'}</strong></span
         >
       </div></Sidebar.Footer
     >
@@ -365,145 +367,83 @@
             </section>{/if}
         </section>
       {:else if page === 'home'}
-        <section class="home-page page-content">
+        <section class="home-page calm-home page-content">
           <div class="page-heading">
             <div>
-              <div class="eyebrow"><CalendarDays size={14} />{today}</div>
-              <h1>今天，又是积累的一天。</h1>
-              <p>一点专注，让知识留得更久。</p>
+              <h1>今日学习</h1>
+              <p class="home-summary">
+                待学 {due} 张<span aria-hidden="true"> · </span>今天已作答 {home.completed} 次
+              </p>
             </div>
-            <Button variant="outline" onclick={() => act('add')}><Plus size={16} />添加卡片</Button>
+            <Button variant="outline" aria-label="添加卡片" onclick={() => act('add')}
+              ><Plus size={17} /><span class="add-card-label">添加卡片</span></Button
+            >
           </div>
-          <div class="home-grid">
-            <div class="home-primary">
-              <section class="study-hero">
-                <div class="hero-content">
-                  <Badge variant="secondary" class="hero-badge"
-                    ><span class="tiny-dot"></span>今日学习</Badge
-                  >
-                  <h2>
-                    {busy ? '正在读取牌组…' : due ? `${due} 张卡片，` : '今天的复习，完成了。'}<br
-                    />把新知变成记忆。
-                  </h2>
-                  <p>跟着自己的节奏，完成今天的一小步。</p>
-                  <div class="hero-counts">
-                    <div><strong>{home.review}</strong><span>待复习</span></div>
-                    <div><strong>{home.learning}</strong><span>学习中</span></div>
-                    <div><strong>{home.new}</strong><span>未学习</span></div>
-                  </div>
-                  <div class="hero-actions">
-                    <Button
-                      size="lg"
-                      onclick={() => act('study')}
-                      disabled={!home.decks.length || busy}
-                      >继续当前牌组<ArrowRight size={16} /></Button
-                    >
-                  </div>
-                </div>
-                <div class="memory-art" aria-hidden="true">
-                  <div class="art-card art-back"></div>
-                  <div class="art-card art-front">
-                    <span class="art-symbol">Aa</span><span class="art-label"
-                      >A LITTLE EVERY DAY</span
-                    >
-                    <div class="art-line"></div>
-                    <span class="art-word">Remember<br />more.</span><span class="art-mark"
-                      ><Check size={17} /></span
-                    >
-                  </div>
-                  <span class="art-star">✦</span>
-                </div>
-              </section>
-              <section class="deck-section">
-                <div class="section-heading">
-                  <div class="flex items-center gap-2">
-                    <h2>我的牌组</h2>
-                    <span class="quiet-count">{home.decks.length}</span>
-                  </div>
-                  <Button variant="ghost" size="sm" onclick={() => act('create')}
-                    ><Plus size={15} />新建牌组</Button
-                  >
-                </div>
-                <div class="deck-table">
-                  <div class="deck-table-head">
-                    <span>牌组名称</span><span>待复习</span><span>未学习</span><span></span>
-                  </div>
-                  {#each home.decks as deck}<div class="deck-row">
-                      <button
-                        class="deck-title-button"
-                        onclick={() => act('study', { deckId: deck.id })}
-                        ><DeckIcon {deck} /><span
-                          ><strong>{deck.name}</strong><small>{deck.learning} 张学习中</small></span
-                        ></button
-                      ><span class="deck-number blue-text">{deck.review}</span><span
-                        class="deck-number muted-text">{deck.new}</span
-                      ><Menu.Root
-                        ><Menu.Trigger class="icon-control" aria-label={`${deck.name}更多操作`}
-                          ><MoreHorizontal size={18} /></Menu.Trigger
-                        ><Menu.Content align="end"
-                          ><Menu.Item onclick={() => act('study', { deckId: deck.id })}
-                            >学习此牌组</Menu.Item
-                          ><Menu.Item onclick={() => browse(deck.id)}>查看卡片</Menu.Item><Menu.Item
-                            onclick={() => act('options', { deckId: deck.id })}>牌组选项</Menu.Item
-                          ><Menu.Item onclick={() => act('rename', { deckId: deck.id })}
-                            >重命名牌组</Menu.Item
-                          ></Menu.Content
-                        ></Menu.Root
-                      >
-                    </div>{/each}
-                  {#if !home.decks.length && !busy}<div class="empty-state">
-                      <BookOpen size={30} />
-                      <h3>从第一张卡片开始</h3>
-                      <Button onclick={() => act('create')}>新建牌组</Button>
-                    </div>{/if}
-                </div>
-                <div class="deck-section-footer">
-                  <BookOpen size={14} /><span>好记性，从一张好卡片开始。</span><button
-                    onclick={() => browse()}>管理全部卡片<ArrowRight size={13} /></button
-                  >
-                </div>
-              </section>
-            </div>
-            <aside class="home-aside">
-              <section class="daily-goal">
-                <div class="aside-heading">
-                  <h3>今日学习</h3>
-                  <Check size={17} />
-                </div>
-                <div class="goal-number">{home.completed}<span> 次作答</span></div>
-                <div class="live-studied">{@html home.studiedToday}</div>
-              </section>
-              <section class="activity-panel">
-                <div class="aside-heading">
-                  <h3>学习足迹</h3>
-                  <Badge variant="outline" class="sample-label">最近28天</Badge>
-                </div>
-                <p class="activity-subtitle">把坚持，留在日历里。</p>
-                <div class="activity-grid" aria-label="最近28天的真实作答次数">
-                  {#each home.activity as count, i}<span
-                      class="activity-cell level-{Math.min(4, Math.ceil(count / 10))}"
-                      title={`${27 - i}天前 · ${count}次作答`}
-                    ></span>{/each}
-                </div>
-                <div class="activity-legend">
-                  <span>过去 4 周</span>
-                  <div>
-                    少<span class="activity-cell level-0"></span><span class="activity-cell level-2"
-                    ></span><span class="activity-cell level-4"></span>多
-                  </div>
-                </div>
-              </section>
-              <div class="preview-note">
-                <span class="preview-note-icon"><Layers size={18} /></span><strong
-                  >{home.total} 张卡片，慢慢积累。</strong
-                >
-                <p>今天的数量由牌组学习限制决定。</p>
-                <Button variant="outline" size="sm" onclick={() => act('import')}
-                  ><Download size={14} />导入资料</Button
+          {#if currentDeck}<section class="home-startbar" aria-label="当前牌组">
+              <div class="home-current-deck">
+                <span>当前牌组</span><strong title={currentDeck.name}>{currentDeck.name}</strong>
+              </div>
+              <Button
+                size="lg"
+                onclick={() => act('study', { deckId: currentDeck.id })}
+                disabled={busy}
+                >{currentDue ? '开始学习' : '查看牌组'}<ArrowRight size={17} /></Button
+              >
+            </section>{:else if busy}<p class="home-loading" role="status">正在读取牌组…</p>{/if}
+          <section class="deck-section">
+            <div class="section-heading">
+              <div class="flex items-center gap-2">
+                <h2>我的牌组</h2>
+                <span class="quiet-count">{home.decks.length}</span>
+              </div>
+              <div class="home-deck-actions">
+                <Button variant="ghost" size="sm" onclick={() => act('import')}
+                  ><Download size={16} />导入</Button
+                ><Button variant="ghost" size="sm" onclick={() => act('create')}
+                  ><Plus size={16} />新建牌组</Button
                 >
               </div>
-            </aside>
-          </div>
+            </div>
+            <div class="deck-table">
+              <div class="deck-table-head"><span>牌组名称</span><span>待学</span><span></span></div>
+              {#each home.decks as deck}{@const deckDue = deck.new + deck.learning + deck.review}
+                <div class="deck-row">
+                  <button
+                    class="deck-title-button"
+                    title={deck.name}
+                    aria-label={`学习牌组：${deck.name}`}
+                    onclick={() => act('study', { deckId: deck.id })}
+                    ><DeckIcon {deck} /><span><strong>{deck.name}</strong></span></button
+                  >
+                  <span
+                    class="deck-number"
+                    class:blue-text={deckDue > 0}
+                    class:muted-text={!deckDue}>{deckDue || '—'}</span
+                  >
+                  <Menu.Root
+                    ><Menu.Trigger class="icon-control" aria-label={`${deck.name}更多操作`}
+                      ><MoreHorizontal size={19} /></Menu.Trigger
+                    ><Menu.Content align="end"
+                      ><Menu.Item onclick={() => act('study', { deckId: deck.id })}
+                        >学习此牌组</Menu.Item
+                      ><Menu.Item onclick={() => browse(deck.id)}>查看卡片</Menu.Item><Menu.Item
+                        onclick={() => act('options', { deckId: deck.id })}>牌组选项</Menu.Item
+                      ><Menu.Item onclick={() => act('rename', { deckId: deck.id })}
+                        >重命名牌组</Menu.Item
+                      ></Menu.Content
+                    ></Menu.Root
+                  >
+                </div>{/each}
+              {#if !home.decks.length && !busy}<div class="empty-state">
+                  <BookOpen size={28} />
+                  <h3>还没有牌组</h3>
+                  <Button onclick={() => act('create')}>新建牌组</Button>
+                </div>{/if}
+            </div>
+            <div class="deck-section-footer">
+              <button onclick={() => browse()}>管理全部卡片<ArrowRight size={15} /></button>
+            </div>
+          </section>
         </section>
       {:else}
         <section class="cards-page">

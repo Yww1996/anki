@@ -21,6 +21,7 @@ export interface Home {
   dark: boolean;
   profile: string;
   page: string;
+  currentDeckId?: string;
   cardFilters?: { query: string; deckId: string; state: string };
   overview?: {
     id: string;

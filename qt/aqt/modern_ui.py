@@ -229,6 +229,7 @@ class ModernUI:
             "total": col.card_count(),
             "dark": theme_manager.night_mode,
             "profile": self.mw.pm.name,
+            "currentDeckId": str(col.decks.get_current_id()),
             "page": "overview" if self.mw.state == "overview" else self.active_page,
             "cardFilters": self.card_filters,
             "overview": self._overview(col) if self.mw.state == "overview" else None,
@@ -315,8 +316,8 @@ def show_sync_login(mw: Any, callback: Any, username: str, password: str) -> Non
     dialog.setWindowTitle(tr.qt_misc_sync())
     dialog.setWindowModality(Qt.WindowModality.WindowModal)
     disable_help_button(dialog)
-    dialog.resize(460, 510)
-    dialog.setMinimumSize(420, 490)
+    dialog.resize(480, 560)
+    dialog.setMinimumSize(440, 520)
     web = AnkiWebView(dialog)
     web.requiresCol = False
     credentials = ["", ""]

@@ -316,8 +316,8 @@ def show_sync_login(mw: Any, callback: Any, username: str, password: str) -> Non
     dialog.setWindowTitle(tr.qt_misc_sync())
     dialog.setWindowModality(Qt.WindowModality.WindowModal)
     disable_help_button(dialog)
-    dialog.resize(480, 560)
-    dialog.setMinimumSize(440, 520)
+    dialog.resize(420, 460)
+    dialog.setMinimumSize(400, 440)
     web = AnkiWebView(dialog)
     web.requiresCol = False
     credentials = ["", ""]

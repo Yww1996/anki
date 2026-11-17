@@ -51,8 +51,8 @@ class ModernPreferences:
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.addWidget(self.web)
-        dialog.setMinimumSize(740, 540)
-        dialog.resize(960, 720)
+        dialog.setMinimumSize(680, 480)
+        dialog.resize(780, 580)
         self.web.stdHtml(
             '<div id="app" data-mode="preferences"></div>'
             + self.web.bundledScript("modern/modern.js"),
@@ -101,7 +101,12 @@ class ModernPreferences:
                     ),
                 }
             )
-        return {"pages": pages, "dark": theme_manager.night_mode}
+        return {
+            "pages": pages,
+            "dark": theme_manager.night_mode,
+            "fsrs": bool(self.dialog.mw.col.get_config("fsrs", False)),
+            "deck": self.dialog.mw.col.decks.current()["name"],
+        }
 
     def _walk(self, widget: QWidget, groups: list, group: dict) -> None:
         if isinstance(widget, QScrollArea):
@@ -213,6 +218,11 @@ class ModernPreferences:
             return None
         if action == "help":
             self.dialog.form.buttonBox.helpRequested.emit()
+            return None
+        if action == "algorithm":
+            from aqt.deckoptions import confirm_deck_then_display_options
+
+            self.dialog.accept_with_callback(confirm_deck_then_display_options)
             return None
         if action == "labs":
             self.show_labs()

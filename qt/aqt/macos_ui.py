@@ -381,6 +381,9 @@ def modern_progress_styles(night: bool) -> str:
     return f"""
 QDialog {{ background: {surface}; color: {text}; }}
 QLabel {{ color: {text}; font-size: 15px; }}
+QLabel#progressTitle {{ font-size: 17px; font-weight: 600; }}
+QLabel#progressStatus {{ color: {muted}; font-size: 14px; }}
+QLabel#progressIcon {{ background: {border}; color: {accent}; border-radius: 11px; font-size: 27px; }}
 QPushButton {{ min-height: 26px; padding: 4px 16px; border: 1px solid {border};
     border-radius: 7px; background: {surface}; color: {text}; }}
 QProgressBar {{ border: none; border-radius: 3px; min-height: 6px;

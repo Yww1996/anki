@@ -3174,3 +3174,33 @@ body.hidden .review-header {
     display: none;
   }
 }
+
+/* Compact settings and sync sheets retain the readable type scale. */
+.preferences-shell { grid-template-columns: 168px minmax(0, 1fr); }
+.preferences-nav { padding: 20px 10px; }
+.preferences-brand { padding: 0 10px 20px; font-size: 16px; gap: 8px; }
+.preferences-nav nav { gap: 3px; }
+.preferences-nav nav button { padding: 9px 10px; gap: 9px; }
+.preferences-main > header { display: none; }
+.preferences-content { padding: 22px 22px 12px; }
+.preferences-heading h1 { font-size: 22px; }
+.preferences-search { margin: 16px 0; }
+.preferences-card { padding: 4px 16px; margin: 12px 0; }
+.preferences-row { padding: 12px 0; gap: 12px; }
+.preferences-main > footer { padding: 12px 22px; }
+.algorithm-card { padding: 20px; }
+.algorithm-card h2 { font-size: 24px; padding: 5px 0 10px; }
+.algorithm-card p { font-size: 14px; line-height: 1.7; color: var(--muted-foreground); }
+.algorithm-caption { font-size: 14px; color: var(--muted-foreground); }
+.algorithm-location { margin: 20px 0; padding-top: 16px; border-top: 1px solid var(--border); }
+.algorithm-location strong { font-size: 15px; }
+.algorithm-location p { margin-top: 8px; }
+.algorithm-card button { margin-top: 16px; }
+.sync-login-page { padding: 26px 28px 24px; }
+.sync-login-heading { display: flex; align-items: center; gap: 14px; }
+.sync-login-heading .sync-login-symbol { margin: 0; flex-shrink: 0; border: none; border-radius: 12px; }
+.sync-login-heading h1 { font-size: 21px; }
+.sync-login-heading span { font-size: 14px; color: var(--muted-foreground); }
+.sync-login-intro { margin: 18px 0 20px; font-size: 14px; }
+.sync-form-field { margin-bottom: 16px; }
+.sync-login-footer { margin-top: 20px; padding-top: 18px; }

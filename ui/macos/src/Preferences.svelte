@@ -11,6 +11,7 @@
     Layers,
     ChevronRight,
     Search,
+    Brain,
   } from '@lucide/svelte';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
@@ -40,16 +41,19 @@
     active = $state('0'),
     search = $state(''),
     error = $state('');
+  let fsrs = $state(false), deck = $state('');
   const icons = [Palette, BookOpen, Pencil, RefreshCw, Archive, Layers, FlaskConical];
   const current = $derived(pages.find((p) => p.id === active));
   async function request(action: string, extra = {}) {
     error = '';
     try {
-      const data = await new Promise<{ pages: Page[]; dark: boolean } | null>((resolve) =>
+      const data = await new Promise<{ pages: Page[]; dark: boolean; fsrs: boolean; deck: string } | null>((resolve) =>
         window.pycmd('prefs:' + JSON.stringify({ action, ...extra }), resolve),
       );
       if (data) {
         pages = data.pages;
+        fsrs = data.fsrs;
+        deck = data.deck;
         document.documentElement.classList.toggle('dark', data.dark);
       }
     } catch (e) {
@@ -97,18 +101,28 @@
             search = '';
           }}><Icon size={17} /><span>{page.title}</span></button
         >{/each}
+      <button class:active={active === 'algorithm'} onclick={() => { active = 'algorithm'; search = ''; }}><Brain size={17} /><span>复习算法</span></button>
     </nav>
-    <p>让学习空间，<br />更合你的习惯。</p>
   </aside>
   <main class="preferences-main">
     <header>
-      <span>学习空间</span><ChevronRight size={13} /><strong>{current?.title || '偏好设置'}</strong>
+      <span>学习空间</span><ChevronRight size={13} /><strong>{active === 'algorithm' ? '复习算法' : current?.title || '偏好设置'}</strong>
     </header>
     <div class="preferences-content">
       <div class="preferences-heading">
-        <h1>{current?.title || '偏好设置'}</h1>
-        <p>调整习惯，让每一次学习更顺手。</p>
+        <h1>{active === 'algorithm' ? '复习算法' : current?.title || '偏好设置'}</h1>
+
       </div>
+      {#if active === 'algorithm'}
+        <section class="preferences-card algorithm-card">
+          <span class="algorithm-caption">当前算法</span>
+          <h2>{fsrs ? 'FSRS' : 'SM-2 改进版'}</h2>
+          <p>{fsrs ? '根据复习记录估计记忆状态，安排下一次复习。' : '根据评分、难度系数和上次间隔安排复习。'}</p>
+          <div class="algorithm-location"><strong>算法开关在「牌组选项 → FSRS」</strong><p>开启 FSRS 使用记忆模型，关闭则使用传统算法。此开关对整个资料库生效；目标保留率等参数按牌组预设设置。</p></div>
+          <p class="algorithm-caption">当前牌组：{deck}</p>
+          <Button onclick={() => request('algorithm')}>打开牌组选项</Button>
+        </section>
+      {:else}
       <div class="preferences-search">
         <Search size={15} /><Input
           aria-label="搜索当前分类设置"
@@ -196,6 +210,7 @@
                   </div>
                 </div>{/if}{/each}
           </section>{/if}{/each}
+      {/if}
     </div>
     <footer>
       <Button variant="ghost" onclick={() => request('help')}>帮助</Button><Button

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { RefreshCw, ArrowUpRight, LockKeyhole } from '@lucide/svelte';
+  import { Cloud, ArrowUpRight } from '@lucide/svelte';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   let username = $state(''),
@@ -24,9 +24,8 @@
 </script>
 
 <section class="sync-login-page">
-  <div class="sync-login-symbol"><RefreshCw size={25} /></div>
-  <h1>{labels.title}</h1>
-  <p class="sync-login-intro">登录 AnkiWeb，让卡片和学习进度随身同步。</p>
+  <div class="sync-login-heading"><div class="sync-login-symbol"><Cloud size={24} /></div><div><h1>AnkiWeb 同步</h1><span>卡片与学习进度</span></div></div>
+  <p class="sync-login-intro">登录后，在你的设备之间同步资料库。</p>
   <form onsubmit={submit}>
     <div class="sync-form-field">
       <label for="sync-username">{labels.username}</label><Input
@@ -59,5 +58,5 @@
       ><Button type="submit" disabled={!username.trim() || !password}>{labels.submit}</Button>
     </div>
   </form>
-  <p class="sync-login-security"><LockKeyhole size={12} />登录信息由 Anki 处理</p>
+
 </section>

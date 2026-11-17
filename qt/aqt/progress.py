@@ -352,9 +352,38 @@ class ProgressDialog(QDialog):
 
             self.setStyleSheet(modern_progress_styles(theme_manager.night_mode))
             if layout := self.layout():
-                layout.setContentsMargins(24, 22, 24, 20)
-                layout.setSpacing(16)
-            self.setMinimumWidth(420)
+                while layout.count():
+                    layout.takeAt(0)
+                layout.setContentsMargins(24, 24, 24, 20)
+                layout.setSpacing(18)
+                heading = QHBoxLayout()
+                icon = QLabel("↻", self)
+                icon.setObjectName("progressIcon")
+                icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                icon.setFixedSize(38, 38)
+                title = QLabel(tr.qt_misc_processing(), self)
+                title.setObjectName("progressTitle")
+                self.windowTitleChanged.connect(
+                    lambda text: title.setText(
+                        text if text != "Anki" else tr.qt_misc_processing()
+                    )
+                )
+                heading.addWidget(icon)
+                heading.addWidget(title, 1)
+                layout.addLayout(heading)
+                self.form.label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+                self.form.label.setWordWrap(True)
+                self.form.label.setObjectName("progressStatus")
+                layout.addWidget(self.form.label)
+                layout.addWidget(self.form.progressBar)
+                footer = QHBoxLayout()
+                footer.addStretch()
+                cancel = QPushButton(tr.actions_cancel(), self)
+                cancel.clicked.connect(lambda: setattr(self, "wantCancel", True))
+                footer.addWidget(cancel)
+                layout.addLayout(footer)
+            self.setMinimumWidth(400)
+            self.resize(420, 220)
         self._closingDown = False
         self.wantCancel = False
         if is_mac:

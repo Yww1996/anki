@@ -14,10 +14,19 @@ import aqt.forms
 import aqt.main
 from anki.collection import Collection
 from anki.errors import Interrupted
-from anki.utils import int_time
+from anki.utils import int_time, is_mac
 from aqt import gui_hooks
 from aqt.operations import QueryOp
-from aqt.qt import QDialog, QDialogButtonBox, QPushButton, Qt, QTimer, qconnect
+from aqt.qt import (
+    QDialog,
+    QDialogButtonBox,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    Qt,
+    QTimer,
+    qconnect,
+)
 from aqt.utils import disable_help_button, show_info, tr
 
 
@@ -149,6 +158,29 @@ class MediaSyncDialog(QDialog):
         self.form = aqt.forms.synclog.Ui_Dialog()
         self.form.setupUi(self)
         self.setWindowTitle(tr.sync_media_log_title())
+        if is_mac:
+            from aqt.macos_ui import modern_progress_styles
+            from aqt.theme import theme_manager
+
+            self.setStyleSheet(modern_progress_styles(theme_manager.night_mode))
+            layout = self.layout()
+            layout.setContentsMargins(24, 24, 24, 20)
+            layout.setSpacing(20)
+            heading = QHBoxLayout()
+            icon = QLabel("↻", self)
+            icon.setObjectName("progressIcon")
+            icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            icon.setFixedSize(38, 38)
+            title = QLabel(tr.sync_media_log_title(), self)
+            title.setObjectName("progressTitle")
+            heading.addWidget(icon)
+            heading.addWidget(title, 1)
+            layout.insertLayout(0, heading)
+            self.form.log_label.setObjectName("progressStatus")
+            self.form.log_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+            self.form.log_label.setWordWrap(True)
+            self.setMinimumWidth(400)
+            self.resize(420, 200)
         disable_help_button(self)
         self.abort_button = QPushButton(tr.sync_abort_button())
         qconnect(self.abort_button.clicked, self._on_abort)
@@ -187,7 +219,8 @@ class MediaSyncDialog(QDialog):
         dt = datetime.fromtimestamp(int_time())
         time = dt.strftime("%H:%M:%S")
         text = f"{time}: {entry}"
-        self.form.log_label.setText(text)
+        self.form.log_label.setText(entry if is_mac else text)
+        self.form.log_label.setToolTip(text)
         if not self._syncer.is_syncing():
             self.abort_button.setHidden(True)
 

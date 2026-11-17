@@ -419,8 +419,8 @@ button:disabled {
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
-  border-bottom: 1px solid var(--border);
-  background: var(--card);
+  border-bottom: none;
+  background: var(--background);
 }
 .topbar-breadcrumb {
   display: flex;
@@ -3003,7 +3003,7 @@ body.hidden .review-header {
 .calm-home {
   max-width: 1120px;
   width: 100%;
-  padding: 28px 32px;
+  padding: 20px 32px 28px;
 }
 .calm-home .page-heading {
   margin-bottom: 20px;

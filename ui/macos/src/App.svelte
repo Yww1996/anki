@@ -266,7 +266,7 @@
           }}><Search size={14} /><span>搜索卡片</span><kbd>⌘ K</kbd></button
         ><Button variant="ghost" size="icon-sm" aria-label="切换深浅色" onclick={() => act('theme')}
           >{#if home.dark}<Sun size={17} />{:else}<Moon size={17} />{/if}</Button
-        ><Button variant="outline" size="sm" onclick={() => act('sync')}
+        ><Button variant="ghost" size="sm" onclick={() => act('sync')}
           ><RefreshCw size={14} />同步</Button
         >
       </div>

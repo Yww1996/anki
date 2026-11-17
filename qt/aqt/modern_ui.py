@@ -217,3 +217,79 @@ class ModernUI:
                 }
             )
         return {"cards": cards, "total": len(ids)}
+
+
+def show_sync_login(mw: Any, callback: Any, username: str, password: str) -> None:
+    """Present the upstream login callback in the same UI as the macOS shell."""
+    import html
+
+    from aqt.qt import QDialog, Qt, QVBoxLayout, qconnect
+    from aqt.utils import disable_help_button, tr
+    from aqt.webview import AnkiWebView
+
+    dialog = QDialog(mw)
+    dialog.setWindowTitle(tr.qt_misc_sync())
+    dialog.setWindowModality(Qt.WindowModality.WindowModal)
+    disable_help_button(dialog)
+    dialog.resize(460, 510)
+    dialog.setMinimumSize(420, 490)
+    web = AnkiWebView(dialog)
+    web.requiresCol = False
+    credentials = ["", ""]
+
+    def handle(command: str) -> bool:
+        if not command.startswith("sync-login:"):
+            return False
+        try:
+            result = json.loads(command[len("sync-login:") :])
+            if result.get("accepted"):
+                user = str(result.get("username", "")).strip()
+                secret = str(result.get("password", ""))
+                if not user or not secret:
+                    return False
+                credentials[:] = [user, secret]
+                dialog.accept()
+            else:
+                dialog.reject()
+        except (ValueError, TypeError):
+            pass
+        return False
+
+    def finished(result: int) -> None:
+        # No credentials enter localStorage, URLs, logs or generated markup.
+        user, secret = (
+            credentials if result == QDialog.DialogCode.Accepted else ("", "")
+        )
+        credentials[:] = ["", ""]
+        web.cleanup()
+        dialog.deleteLater()
+        callback(user, secret)
+
+    labels = html.escape(
+        json.dumps(
+            {
+                "title": tr.qt_misc_sync(),
+                "username": tr.sync_ankiweb_id_label(),
+                "password": tr.sync_password_label(),
+                "cancel": tr.actions_cancel(),
+                "submit": tr.sync_log_in_button(),
+            }
+        ),
+        quote=True,
+    )
+    layout = QVBoxLayout(dialog)
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.addWidget(web)
+    web.set_bridge_command(handle, ModernUI)
+    # Retrying a rejected login keeps the username, but requires re-entering the password.
+    web.stdHtml(
+        f'<div id="app" data-mode="sync-login" data-username="{html.escape(username, quote=True)}" '
+        f'data-dark="{str(theme_manager.night_mode).lower()}" data-labels="{labels}"></div>'
+        + web.bundledScript("modern/modern.js"),
+        css=["modern/modern.css"],
+        js=[],
+        default_css=False,
+        context=ModernUI,
+    )
+    qconnect(dialog.finished, finished)
+    dialog.open()

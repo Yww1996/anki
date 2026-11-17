@@ -349,3 +349,32 @@ body.isMac:not(.card) :is(button, input, select):disabled { opacity: 0.55; }
     body.isMac:not(.card) :is(button, .btn) { transition: none; }
 }
 """
+
+
+def modern_progress_styles(night: bool) -> str:
+    """Match progress sheets to the Svelte shell without changing cancellation."""
+    if night:
+        surface, text, muted, border, accent = (
+            "#202633",
+            "#e9edf5",
+            "#9ca7bb",
+            "#363e50",
+            "#96a4ff",
+        )
+    else:
+        surface, text, muted, border, accent = (
+            "#ffffff",
+            "#252c3d",
+            "#6b7585",
+            "#e3e7ef",
+            "#465fd9",
+        )
+    return f"""
+QDialog {{ background: {surface}; color: {text}; }}
+QLabel {{ color: {text}; font-size: 13px; }}
+QPushButton {{ min-height: 26px; padding: 4px 16px; border: 1px solid {border};
+    border-radius: 7px; background: {surface}; color: {text}; }}
+QProgressBar {{ border: none; border-radius: 3px; min-height: 6px;
+    max-height: 6px; background: {border}; color: {muted}; }}
+QProgressBar::chunk {{ background: {accent}; border-radius: 3px; }}
+"""

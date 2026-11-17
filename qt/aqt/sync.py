@@ -352,6 +352,14 @@ def get_id_and_pass_from_user(
     username: str = "",
     password: str = "",
 ) -> None:
+    from anki.utils import is_mac
+
+    if is_mac:
+        from aqt.modern_ui import available, show_sync_login
+
+        if available():
+            show_sync_login(mw, callback, username, password)
+            return
     diag = QDialog(mw)
     diag.setWindowTitle(tr.qt_misc_sync())
     disable_help_button(diag)

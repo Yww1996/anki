@@ -343,6 +343,17 @@ class ProgressDialog(QDialog):
         disable_help_button(self)
         self.form = aqt.forms.progress.Ui_Dialog()
         self.form.setupUi(self)
+        from anki.utils import is_mac
+
+        if is_mac:
+            from aqt.macos_ui import modern_progress_styles
+            from aqt.theme import theme_manager
+
+            self.setStyleSheet(modern_progress_styles(theme_manager.night_mode))
+            if layout := self.layout():
+                layout.setContentsMargins(24, 22, 24, 20)
+                layout.setSpacing(16)
+            self.setMinimumWidth(420)
         self._closingDown = False
         self.wantCancel = False
         # required for smooth progress bars

@@ -1181,7 +1181,7 @@ title="{}" {}>{}</button>""".format(
     def setupKeys(self) -> None:
         globalShortcuts = [
             ("Ctrl+:", show_debug_console),
-            ("d", self.toolbar._deckLinkHandler),
+            ("d", lambda: self.toolbar._deckLinkHandler()),
             ("s", self.onStudyKey),
             ("a", self.onAddCard),
             ("b", self.onBrowse),

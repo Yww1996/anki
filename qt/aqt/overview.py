@@ -191,14 +191,20 @@ class Overview:
         else:
             shareLink = ""
         from anki.utils import is_mac
-        from aqt.modern_ui import ModernUI, available
+        from aqt.modern_ui import ModernUI, available, legacy_overview_hooks
 
-        if is_mac and available():
+        if is_mac and available() and not legacy_overview_hooks():
             browser = self.mw.deckBrowser
             if not hasattr(browser, "modern_ui"):
                 browser.modern_ui = ModernUI(browser)
             browser.modern_ui.render()
             return
+        if is_mac:
+            from aqt.qt import QWidget
+
+            QWidget.setVisible(self.mw.toolbarWeb, True)
+            QWidget.setVisible(self.mw.bottomWeb, True)
+            self.mw.toolbar.draw()
         if self.mw.col.sched._is_finished():
             self._show_finished_screen()
             return
@@ -294,9 +300,9 @@ class Overview:
 
     def _renderBottom(self) -> None:
         from anki.utils import is_mac
-        from aqt.modern_ui import available
+        from aqt.modern_ui import available, legacy_overview_hooks
 
-        if is_mac and available():
+        if is_mac and available() and not legacy_overview_hooks():
             return
         links = [
             ["O", "opts", tr.actions_options()],

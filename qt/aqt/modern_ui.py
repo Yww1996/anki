@@ -25,6 +25,25 @@ def available() -> bool:
     return (aqt_data_path() / "web/modern/modern.js").is_file()
 
 
+def legacy_deck_hooks() -> bool:
+    from aqt import gui_hooks
+
+    return bool(
+        gui_hooks.deck_browser_will_render_content.count()
+        or gui_hooks.deck_browser_did_render.count()
+    )
+
+
+def legacy_overview_hooks() -> bool:
+    from aqt import gui_hooks
+
+    return bool(
+        gui_hooks.overview_will_render_content.count()
+        or gui_hooks.overview_will_render_bottom.count()
+        or gui_hooks.overview_did_refresh.count()
+    )
+
+
 class ModernUI:
     uses_modern_ui = True
 
@@ -241,8 +260,10 @@ class ModernUI:
     ) -> dict[str, Any]:
         parts = [f"({query})"] if query.strip() else []
         if deck_id != "all":
-            # Numeric deck IDs cannot introduce search operators.
-            parts.append(f"did:{int(deck_id)}")
+            # Match the parent and every descendant, including cards temporarily
+            # moved into filtered decks. IDs avoid deck-name wildcard semantics.
+            ids = col.decks.deck_and_child_ids(DeckId(int(deck_id)))
+            parts.append("did:" + ",".join(str(did) for did in ids))
         filters = {
             "new": "is:new",
             "learning": "is:learn",

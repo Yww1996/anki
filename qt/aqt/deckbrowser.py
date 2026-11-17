@@ -105,7 +105,7 @@ class DeckBrowser:
 
     def _linkHandler(self, url: str) -> Any:
         if url.startswith("modern:") and hasattr(self, "modern_ui"):
-            self.modern_ui.handle(url[len("modern:"):])
+            self.modern_ui.handle(url[len("modern:") :])
             return False
         if ":" in url:
             (cmd, arg) = url.split(":", 1)
@@ -184,14 +184,19 @@ class DeckBrowser:
 
     def __renderPage(self, offset: int | None) -> None:
         if is_mac:
-            from aqt.modern_ui import ModernUI, available
+            from aqt.modern_ui import ModernUI, available, legacy_deck_hooks
 
-            if available():
+            if available() and not legacy_deck_hooks():
                 if not hasattr(self, "modern_ui"):
                     self.modern_ui = ModernUI(self)
                 self.modern_ui.render()
                 gui_hooks.deck_browser_did_render(self)
                 return
+        if is_mac:
+            # Preserve legacy HTML, scripts and hook timing for page extensions.
+            QWidget.setVisible(self.mw.toolbarWeb, True)
+            QWidget.setVisible(self.mw.bottomWeb, True)
+            self.mw.toolbar.draw()
         data = self._render_data
         content = DeckBrowserContent(
             tree=self._renderDeckTree(data.tree),

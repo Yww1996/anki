@@ -60,8 +60,22 @@
     for (let i = 0; !window.pycmd && i < 250; i++) await new Promise((r) => setTimeout(r, 20));
     await request('load');
   });
-  function stage(id: string, value: string | number) {
-    window.pycmd('prefs:' + JSON.stringify({ action: 'edit', id, value }));
+  const draftVersions = new Map<string, number>();
+  function stage(id: string, value: string | number, normalize = false) {
+    const version = (draftVersions.get(id) || 0) + 1;
+    draftVersions.set(id, version);
+    const findItem = () =>
+      pages.flatMap((p) => p.groups.flatMap((g) => g.items)).find((item) => item.id === id);
+    const item = findItem();
+    if (item) item.value = value;
+    window.pycmd('prefs:' + JSON.stringify({ action: 'edit', id, value }), (result) => {
+      if (draftVersions.get(id) !== version || result?.id !== id) return;
+      const current = findItem();
+      // Native spinboxes clamp intermediate digits (6 while entering 60).
+      // Keep that draft while typing, then normalize when focus leaves.
+      if (current?.type === 'number' && !normalize && document.activeElement?.id === id) return;
+      if (current) current.value = result.value;
+    });
   }
   function match(item: Item) {
     return (
@@ -148,6 +162,14 @@
                         step={item.step}
                         disabled={item.disabled}
                         class="preferences-number"
+                        onblur={(e) => {
+                          if (
+                            e.currentTarget.value !== '' &&
+                            Number.isFinite(e.currentTarget.valueAsNumber)
+                          )
+                            stage(item.id, e.currentTarget.valueAsNumber, true);
+                          else void request('load');
+                        }}
                         oninput={(e) => {
                           if (
                             e.currentTarget.value !== '' &&

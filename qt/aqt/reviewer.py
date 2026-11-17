@@ -681,7 +681,9 @@ class Reviewer:
             self._answerCard(self._defaultEase())
 
     def _linkHandler(self, url: str) -> None:
-        if url == "ans":
+        if url == "modern-chrome-resize":
+            self.bottom.web.adjustHeightToFit()
+        elif url == "ans":
             self._getTypedAnswer()
         elif url.startswith("ease"):
             val: Literal[1, 2, 3, 4] = int(url[4:])  # type: ignore

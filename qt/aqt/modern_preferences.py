@@ -235,7 +235,16 @@ class ModernPreferences:
                 widget.setText(str(value))
         elif action == "button" and isinstance(widget, QAbstractButton):
             widget.click()
-        return None if action == "edit" else self.schema()
+        if action == "edit":
+            current: str | int | float
+            if isinstance(widget, QLineEdit):
+                current = widget.text()
+            elif isinstance(widget, (QSpinBox, QDoubleSpinBox)):
+                current = widget.value()
+            else:
+                return None
+            return {"id": request["id"], "value": current}
+        return self.schema()
 
     def show_labs(self) -> None:
         page = self.dialog.form.labsTab

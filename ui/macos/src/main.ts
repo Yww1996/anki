@@ -28,3 +28,23 @@ syncTheme();
 const themeObserver = new MutationObserver(syncTheme);
 themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 window.addEventListener('pagehide', () => themeObserver.disconnect(), { once: true });
+
+// The native webview must grow when compact controls wrap at narrow widths.
+if (target.dataset.mode?.startsWith('review-')) {
+  let lastHeight = -1;
+  let attempts = 0;
+  const notifyHeight = () => {
+    if (!window.pycmd) {
+      if (++attempts < 250) setTimeout(notifyHeight, 20);
+      return;
+    }
+    const height = Math.ceil(target.getBoundingClientRect().height);
+    if (height !== lastHeight) {
+      lastHeight = height;
+      window.pycmd('modern-chrome-resize');
+    }
+  };
+  const sizeObserver = new ResizeObserver(notifyHeight);
+  sizeObserver.observe(target);
+  window.addEventListener('pagehide', () => sizeObserver.disconnect(), { once: true });
+}

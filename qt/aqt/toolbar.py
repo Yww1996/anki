@@ -299,7 +299,7 @@ class Toolbar:
             right_tray_content=self._right_tray_content(),
         )
         from anki.utils import is_mac
-        from aqt.modern_ui import available, render_component
+        from aqt.modern_ui import available, legacy_deck_hooks, render_component
 
         if is_mac and available():
 
@@ -309,7 +309,8 @@ class Toolbar:
                     browser.modern_ui.active_page = "cards"
                 self.mw.moveToState("deckBrowser")
 
-            self.link_handlers["browse"] = browse_cards
+            if not legacy_deck_hooks():
+                self.link_handlers["browse"] = browse_cards
             render_component(self.web, "review-header", {"links": body}, web_context)
             self.web.adjustHeightToFit()
             return
@@ -449,6 +450,9 @@ class Toolbar:
     ######################################################################
 
     def _linkHandler(self, link: str) -> bool:
+        if link == "modern-chrome-resize":
+            self.web.adjustHeightToFit()
+            return False
         if link in self.link_handlers:
             self.link_handlers[link]()
         return False

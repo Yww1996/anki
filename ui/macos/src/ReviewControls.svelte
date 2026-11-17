@@ -11,6 +11,7 @@
     limit = $state(0),
     stopped = $state(false);
   let question = $state(true);
+  let queues: { label: string; value: string; kind: string; current: boolean }[] = $state([]);
   let legacyHtml = $state('');
   function update(html: string) {
     const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -21,6 +22,24 @@
         ? html
         : '';
     remaining = doc.querySelector('.stattxt')?.innerHTML || '';
+    const labels = [
+      ['new', '未学习'],
+      ['learn', '学习中'],
+      ['review', '待复习'],
+    ];
+    queues = labels.flatMap(([kind, label]) => {
+      const count = doc.querySelector(`.stattxt .${kind}-count`);
+      return count
+        ? [
+            {
+              label,
+              kind,
+              value: count.textContent?.trim() || '0',
+              current: !!count.querySelector('u'),
+            },
+          ]
+        : [];
+    });
     buttons = Array.from(doc.querySelectorAll('button')).map((b) => {
       const clone = b.cloneNode(true) as HTMLElement;
       clone.querySelectorAll('.stattxt,.nobold').forEach((n) => n.remove());
@@ -59,12 +78,18 @@
   });
 </script>
 
-<div class="review-controls">
+<div class="review-controls" class:question>
   <Button variant="ghost" size="sm" onclick={() => window.pycmd('edit')}
     ><Pencil size={15} />{meta.edit}</Button
   >
   <div class="review-ratings">
-    <div class="review-remaining">{@html remaining}</div>
+    <div class="review-remaining" aria-label="剩余卡片">
+      {#if queues.length}{#each queues as queue}<span
+            class="queue-count queue-{queue.kind}"
+            class:current={queue.current}
+            ><span>{queue.label}</span><strong>{queue.value}</strong></span
+          >{/each}{:else}{@html remaining}{/if}
+    </div>
     <div class="review-rating-buttons">
       {#if legacyHtml}<div class="review-native-controls">{@html legacyHtml}</div>{:else}
         {#each buttons as button}<div class="review-rating-option">

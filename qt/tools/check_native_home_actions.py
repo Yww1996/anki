@@ -20,14 +20,32 @@ class HomeActions(RegressionChecks):
         self.later(self.select, 800)
 
     def select(self):
-        aqt.mw.web.eval("document.querySelectorAll('.deck-title-button')[1].click()")
+        aqt.mw.web.eval(
+            "(()=>{const s=document.querySelector('.split-mobile-picker select');s.value=s.options[1].value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        )
         self.later(self.selected)
 
     def selected(self):
+        col = aqt.mw.col
+        data = aqt.mw.deckBrowser.modern_ui._home(col)
+        self.check(
+            "deck totals include every descendant",
+            all(
+                deck["total"]
+                == col.db.scalar(
+                    "select count() from cards where did in ("
+                    + ",".join(
+                        str(i) for i in col.decks.deck_and_child_ids(int(deck["id"]))
+                    )
+                    + ")"
+                )
+                for deck in data["decks"]
+            ),
+        )
         self.evaluate(
             aqt.mw.web,
             "selecting a row keeps the home and selects that row",
-            "document.querySelectorAll('.deck-row')[1].classList.contains('chosen') && !!document.querySelector('.home-page')",
+            "document.querySelector('.split-focus h1').textContent===document.querySelector('.split-mobile-picker select').selectedOptions[0].textContent && !!document.querySelector('.home-page')",
             self.sync,
         )
 
@@ -68,12 +86,12 @@ class HomeActions(RegressionChecks):
     def study(self):
         mw = aqt.mw
         mw.media_syncer._syncing, mw.media_syncer.last_progress = self.original
-        mw.web.eval("document.querySelectorAll('.deck-study-action')[1].click()")
+        mw.web.eval("document.querySelector('.split-study-action').click()")
         self.later(self.overview, 800)
 
     def overview(self):
         self.check(
-            "row action opens the actual upstream overview", aqt.mw.state == "overview"
+            "start action enters the actual upstream reviewer", aqt.mw.state == "review"
         )
         self.finish(True)
 

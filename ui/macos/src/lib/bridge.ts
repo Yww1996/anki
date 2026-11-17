@@ -8,6 +8,7 @@ export interface Deck {
   learning: number;
   review: number;
   level: number;
+  total?: number;
 }
 export interface Home {
   decks: Deck[];

@@ -177,7 +177,7 @@
 </script>
 
 <svelte:window onkeydown={keydown} />
-<Sidebar.Provider style="--sidebar-width:12rem">
+<Sidebar.Provider class={page === 'home' ? 'native-split-home' : ''} style="--sidebar-width:13rem">
   <Sidebar.Root collapsible="offcanvas" class="app-sidebar">
     <Sidebar.Header class="brand-header"
       ><a
@@ -194,7 +194,7 @@
       ></Sidebar.Header
     >
     <Sidebar.Content
-      ><Sidebar.Group class="sidebar-navigation"
+      >{#if page !== 'home'}<Sidebar.Group class="sidebar-navigation"
         ><Sidebar.GroupContent
           ><Sidebar.Menu>
             <Sidebar.MenuItem
@@ -226,7 +226,7 @@
           </Sidebar.Menu></Sidebar.GroupContent
         ></Sidebar.Group
       >
-      {#if page !== 'home'}<Sidebar.Group class="sidebar-deck-group"
+      {/if}<Sidebar.Group class="sidebar-deck-group"
           ><Sidebar.GroupLabel class="sidebar-group-heading"
             >我的牌组<button class="sidebar-add" aria-label="新建牌组" onclick={() => act('create')}
               ><Plus size={14} /></button
@@ -235,21 +235,21 @@
             ><Sidebar.Menu
               >{#each home.decks as deck}<Sidebar.MenuItem
                   ><NavButton
-                    isActive={(page === 'cards' && deckId === deck.id) ||
+                    isActive={(page === 'home' && currentDeck?.id === deck.id) || (page === 'cards' && deckId === deck.id) ||
                       (page === 'overview' && home.overview?.id === deck.id)}
-                    onclick={() => browse(deck.id)}
+                    onclick={() => page === 'home' ? (chosenDeckId = deck.id) : browse(deck.id)}
                     class="deck-nav-button"
-                    ><DeckIcon {deck} small /><span>{deck.name}</span></NavButton
+                    ><DeckIcon {deck} small /><span>{deck.name}</span>{#if page === 'home'}<span class="split-nav-count">{deck.new + deck.learning + deck.review || '—'}</span>{/if}</NavButton
                   ></Sidebar.MenuItem
                 >{/each}</Sidebar.Menu
             ></Sidebar.GroupContent
           ></Sidebar.Group
         >
-      {/if}</Sidebar.Content
+      </Sidebar.Content
     >
     <Sidebar.Footer class="app-sidebar-footer"
       ><Sidebar.Menu
-        ><Sidebar.MenuItem
+        >{#if page === 'home'}<Sidebar.MenuItem><NavButton class="settings-nav" onclick={() => act('stats')}><ChartNoAxesColumn/><span>学习统计</span></NavButton></Sidebar.MenuItem>{/if}<Sidebar.MenuItem
           ><NavButton onclick={() => act('settings')} class="settings-nav"
             ><Settings2 /><span>偏好设置</span><span class="ml-auto text-xs">⌘ ,</span></NavButton
           ></Sidebar.MenuItem
@@ -267,10 +267,11 @@
       <div class="topbar-breadcrumb">
         <Sidebar.Trigger aria-label="切换侧边栏" /><span class="breadcrumb-root">学习空间</span
         ><ChevronRight size={13} /><strong
-          >{page === 'home' ? '今日学习' : page === 'overview' ? '牌组学习' : '卡片管理'}</strong
+          >{page === 'home' ? '牌组' : page === 'overview' ? '牌组学习' : '卡片管理'}</strong
         >
       </div>
       <div class="topbar-actions">
+        {#if page === 'home'}<Button variant="ghost" size="icon-sm" aria-label="添加卡片" onclick={() => act('add')}><Plus size={18}/></Button>{/if}
         <button
           class="quick-search-button"
           onclick={() => {
@@ -386,76 +387,24 @@
             </section>{/if}
         </section>
       {:else if page === 'home'}
-        <section class="home-page calm-home page-content">
-          <div class="page-heading">
-            <div>
-              <h1>{due ? '今天，学一点。' : '今天已完成'}</h1>
-              <p class="home-summary">
-                待学 {due} 张<span aria-hidden="true"> · </span>今天已作答 {home.completed} 次
-              </p>
+        <section class="home-page native-split-page page-content">
+          {#if currentDeck}
+          <label class="split-mobile-picker"><span>当前牌组</span><select aria-label="选择牌组" value={currentDeck.id} onchange={(event) => (chosenDeckId=event.currentTarget.value)}>{#each home.decks as deck}<option value={deck.id}>{deck.name}</option>{/each}</select></label>
+          <div class="split-focus">
+            <span class="split-deck-emblem"><BookOpen size={28}/></span>
+            <p class="split-caption">当前牌组</p>
+            <h1>{currentDeck.name}</h1>
+            <p class="split-total">共 {currentDeck.total ?? 0} 张卡片</p>
+            <div class="split-counts" aria-label="待学数量">
+              <div><strong>{currentDeck.new}</strong><span>未学习</span></div>
+              <div><strong>{currentDeck.learning}</strong><span>学习中</span></div>
+              <div><strong>{currentDeck.review}</strong><span>待复习</span></div>
             </div>
-            <Button variant="outline" aria-label="添加卡片" onclick={() => act('add')}
-              ><Plus size={17} /><span class="add-card-label">添加卡片</span></Button
-            >
+            <Button class="split-study-action" size="lg" disabled={busy} onclick={() => currentDue ? act('begin-study',{deckId:currentDeck.id}) : browse(currentDeck.id)}>{currentDue ? '开始学习' : '浏览卡片'}<ArrowRight size={17}/></Button>
+            <div class="split-secondary-actions"><Button variant="ghost" size="sm" onclick={() => act('options',{deckId:currentDeck.id})}>牌组选项</Button><Button variant="ghost" size="sm" onclick={() => browse(currentDeck.id)}>浏览卡片</Button></div>
           </div>
-          <section class="deck-section">
-            <div class="section-heading">
-              <div class="flex items-center gap-2">
-                <h2>我的牌组</h2>
-                <span class="quiet-count">{home.decks.length}</span>
-              </div>
-              <div class="home-deck-actions">
-                <Button variant="ghost" size="sm" onclick={() => act('import')}
-                  ><Download size={16} />导入</Button
-                ><Button variant="ghost" size="sm" onclick={() => act('create')}
-                  ><Plus size={16} />新建牌组</Button
-                >
-              </div>
-            </div>
-            <div class="deck-table">
-              <div class="deck-table-head"><span>牌组名称</span><span>待学</span><span></span><span></span></div>
-              {#each home.decks as deck}{@const deckDue = deck.new + deck.learning + deck.review}
-                <div class="deck-row" class:chosen={currentDeck?.id === deck.id}>
-                  <button
-                    class="deck-title-button"
-                    title={deck.name}
-                    aria-label={`选择牌组：${deck.name}`}
-                    aria-pressed={currentDeck?.id === deck.id}
-                    onclick={() => (chosenDeckId = deck.id)}
-                    onkeydown={(event) => {if(event.key === 'Enter'){event.preventDefault();void act('study',{deckId:deck.id});}}}
-                    ondblclick={() => act('study', { deckId: deck.id })}
-                    ><DeckIcon {deck} /><span><strong>{deck.name}</strong></span></button
-                  >
-                  <span
-                    class="deck-number"
-                    class:blue-text={deckDue > 0}
-                    class:muted-text={!deckDue}>{deckDue || '—'}</span
-                  >
-                  <Button class="deck-study-action" variant={currentDeck?.id === deck.id ? 'default' : 'ghost'} size="sm" onclick={() => deckDue ? act('study', {deckId:deck.id}) : browse(deck.id)}>{deckDue ? '开始学习' : '查看卡片'}</Button>
-                  <Menu.Root
-                    ><Menu.Trigger class="icon-control" aria-label={`${deck.name}更多操作`}
-                      ><MoreHorizontal size={19} /></Menu.Trigger
-                    ><Menu.Content align="end"
-                      ><Menu.Item onclick={() => act('study', { deckId: deck.id })}
-                        >学习此牌组</Menu.Item
-                      ><Menu.Item onclick={() => browse(deck.id)}>查看卡片</Menu.Item><Menu.Item
-                        onclick={() => act('options', { deckId: deck.id })}>牌组选项</Menu.Item
-                      ><Menu.Item onclick={() => act('rename', { deckId: deck.id })}
-                        >重命名牌组</Menu.Item
-                      ></Menu.Content
-                    ></Menu.Root
-                  >
-                </div>{/each}
-              {#if !home.decks.length && !busy}<div class="empty-state">
-                  <BookOpen size={28} />
-                  <h3>还没有牌组</h3>
-                  <Button onclick={() => act('create')}>新建牌组</Button>
-                </div>{/if}
-            </div>
-            <div class="deck-section-footer">
-              <button onclick={() => browse()}>管理全部卡片<ArrowRight size={15} /></button>
-            </div>
-          </section>
+          {:else if busy}<p class="home-loading" role="status">正在读取牌组…</p>
+          {:else}<div class="split-focus"><span class="split-deck-emblem"><BookOpen size={28}/></span><h1>还没有牌组</h1><p class="split-total">创建牌组，开始第一次学习。</p><Button onclick={() => act('create')}>新建牌组</Button><Button variant="ghost" onclick={() => act('import')}>导入</Button></div>{/if}
         </section>
       {:else}
         <section class="cards-page">

@@ -33,8 +33,8 @@ class ReadabilityChecks(RegressionChecks):
         self.snapshot("home-" + self.name)
         self.evaluate(
             aqt.mw.web,
-            self.name + ": simple home, no duplicated deck sidebar or secondary panels",
-            """!!document.querySelector('.calm-home .deck-study-action') && !document.querySelector('.home-startbar') && !document.querySelector('.home-aside,.study-hero,.memory-art,.activity-panel,.sidebar-tip,.sidebar-deck-group')""",
+            self.name + ": simple home, no duplicate deck table or secondary panels",
+            """!!document.querySelector('.native-split-page .split-study-action') && !document.querySelector('.deck-table,.home-aside,.study-hero,.memory-art,.activity-panel,.sidebar-tip')""",
             self.fonts,
         )
 
@@ -44,7 +44,7 @@ class ReadabilityChecks(RegressionChecks):
             self.name + ": body, primary action and deck labels use readable sizes",
             """(()=>{
             const size=selector=>parseFloat(getComputedStyle(document.querySelector(selector)).fontSize);
-            return size('body')>=16 && size('.deck-study-action')>=14 && size('.deck-title-button strong')>=16 && size('.home-summary')>=14 && (!document.querySelector('.main-nav-button') || size('.main-nav-button')>=15);
+            return size('body')>=16 && size('.split-study-action')>=15 && size('.split-focus h1')>=24 && size('.split-counts span')>=14 && (!document.querySelector('.main-nav-button') || size('.main-nav-button')>=15);
         })()""",
             self.layout,
         )
@@ -52,12 +52,10 @@ class ReadabilityChecks(RegressionChecks):
     def layout(self):
         self.evaluate(
             aqt.mw.web,
-            self.name
-            + ": study action and first deck rows are visible without scrolling",
+            self.name + ": study action and queue counts are visible without scrolling",
             """(()=>{
             const visible=element=>{const r=element.getBoundingClientRect();return r.left>=0 && r.right<=innerWidth+.5 && r.top>=0 && r.bottom<=innerHeight+.5;};
-            const rows=[...document.querySelectorAll('.deck-row')].slice(0,2);
-            return visible(document.querySelector('.deck-study-action')) && rows.length>0 && rows.every(visible);
+            return visible(document.querySelector('.split-study-action')) && visible(document.querySelector('.split-counts')) && visible(document.querySelector('.split-focus h1'));
         })()""",
             self.actions,
         )
@@ -66,7 +64,7 @@ class ReadabilityChecks(RegressionChecks):
         self.evaluate(
             aqt.mw.web,
             self.name + ": header actions stay inside the viewport",
-            """[...document.querySelectorAll('.app-topbar button,.calm-home button')].filter(b=>b.getClientRects().length && b.getBoundingClientRect().top<innerHeight).every(b=>{const r=b.getBoundingClientRect();return r.left>=-.5&&r.right<=innerWidth+.5;})""",
+            """[...document.querySelectorAll('.app-topbar button,.native-split-page button')].filter(b=>b.getClientRects().length && b.getBoundingClientRect().top<innerHeight).every(b=>{const r=b.getBoundingClientRect();return r.left>=-.5&&r.right<=innerWidth+.5;})""",
             self.advance,
         )
 

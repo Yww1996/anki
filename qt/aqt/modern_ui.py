@@ -124,6 +124,21 @@ class ModernUI:
                 self._query(
                     request_id, lambda col: self._cards(col, query, deck_id, state)
                 )
+            elif action == "begin-study":
+                from aqt.operations.deck import set_current_deck
+
+                def begin(_changes: Any) -> None:
+                    self._reply(request_id, True, generation=generation)
+                    self.mw.col.startTimebox()
+                    self.mw.moveToState("review")
+
+                set_current_deck(
+                    parent=self.mw, deck_id=DeckId(int(args["deckId"]))
+                ).success(begin).failure(
+                    lambda error: self._reply(
+                        request_id, error=str(error), generation=generation
+                    )
+                ).run_in_background(initiator=self.browser)
             elif action == "study":
                 deck_id = args.get("deckId")
                 if deck_id:
@@ -202,8 +217,10 @@ class ModernUI:
     def _home(self, col: Collection) -> dict[str, Any]:
         tree = col.sched.deck_due_tree()
         decks = []
+        card_counts = dict(col.db.all("select did, count() from cards group by did"))
 
-        def walk(node: Any, ancestors: str = "") -> None:
+        def walk(node: Any, ancestors: str = "") -> int:
+            total = 0
             for child in node.children:
                 name = f"{ancestors}::{child.name}" if ancestors else child.name
                 decks.append(
@@ -219,7 +236,11 @@ class ModernUI:
                         "level": child.level,
                     }
                 )
-                walk(child, name)
+                decks_index = len(decks) - 1
+                count = card_counts.get(child.deck_id, 0) + walk(child, name)
+                decks[decks_index]["total"] = count
+                total += count
+            return total
 
         walk(tree)
         cutoff = col.sched.day_cutoff

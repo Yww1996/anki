@@ -34,7 +34,7 @@ class ReadabilityChecks(RegressionChecks):
         self.evaluate(
             aqt.mw.web,
             self.name + ": simple home, no duplicated deck sidebar or secondary panels",
-            """!!document.querySelector('.calm-home .home-startbar') && !document.querySelector('.home-aside,.study-hero,.memory-art,.activity-panel,.sidebar-tip,.sidebar-deck-group')""",
+            """!!document.querySelector('.calm-home .deck-study-action') && !document.querySelector('.home-startbar') && !document.querySelector('.home-aside,.study-hero,.memory-art,.activity-panel,.sidebar-tip,.sidebar-deck-group')""",
             self.fonts,
         )
 
@@ -44,7 +44,7 @@ class ReadabilityChecks(RegressionChecks):
             self.name + ": body, primary action and deck labels use readable sizes",
             """(()=>{
             const size=selector=>parseFloat(getComputedStyle(document.querySelector(selector)).fontSize);
-            return size('body')>=16 && size('.home-startbar button')>=15 && size('.deck-title-button strong')>=16 && size('.home-summary')>=14 && (!document.querySelector('.main-nav-button') || size('.main-nav-button')>=15);
+            return size('body')>=16 && size('.deck-study-action')>=14 && size('.deck-title-button strong')>=16 && size('.home-summary')>=14 && (!document.querySelector('.main-nav-button') || size('.main-nav-button')>=15);
         })()""",
             self.layout,
         )
@@ -57,7 +57,7 @@ class ReadabilityChecks(RegressionChecks):
             """(()=>{
             const visible=element=>{const r=element.getBoundingClientRect();return r.left>=0 && r.right<=innerWidth+.5 && r.top>=0 && r.bottom<=innerHeight+.5;};
             const rows=[...document.querySelectorAll('.deck-row')].slice(0,2);
-            return visible(document.querySelector('.home-startbar button')) && document.querySelector('.home-startbar').getBoundingClientRect().height<=110 && rows.length>0 && rows.every(visible);
+            return visible(document.querySelector('.deck-study-action')) && rows.length>0 && rows.every(visible);
         })()""",
             self.actions,
         )

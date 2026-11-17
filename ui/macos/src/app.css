@@ -3204,3 +3204,39 @@ body.hidden .review-header {
 .sync-login-intro { margin: 18px 0 20px; font-size: 14px; }
 .sync-form-field { margin-bottom: 16px; }
 .sync-login-footer { margin-top: 20px; padding-top: 18px; }
+/* Content-first native application layout. */
+.app-sidebar .brand-header { height:100px; padding-top:18px; }
+.brand-symbol { width:25px;height:25px;border-radius:0;background:transparent;color:var(--primary);box-shadow:none; }
+.brand-symbol svg { width:23px;height:23px; }
+.brand-word { font-size:19px; }
+.app-topbar { position:relative;padding-inline:28px; }
+.calm-home { max-width:1120px;padding:22px 28px 28px; }
+.calm-home .page-heading { margin-bottom:32px; }
+.calm-home .deck-section { margin-top:0; }
+.calm-home .deck-table { border:none;border-radius:0;background:transparent;overflow:visible; }
+.calm-home .deck-table-head,.calm-home .deck-row { grid-template-columns:minmax(0,1fr) 48px 100px 28px;padding-inline:12px;gap:10px; }
+.calm-home .deck-table-head { background:transparent; }
+.calm-home .deck-row { min-height:72px;border-top:1px solid var(--border); }
+.calm-home .deck-row.chosen { background:var(--sidebar-accent);border-radius:9px;border-color:transparent; }
+.calm-home .deck-icon { width:22px;height:24px;color:var(--muted-foreground);background:transparent;border-radius:0; }
+.calm-home .deck-icon svg { width:20px;height:20px; }
+.calm-home .deck-title-button { gap:12px; }
+.calm-home .deck-title-button strong { font-weight:500; }
+.calm-home .deck-study-action { font-size:15px;white-space:nowrap;padding-inline:10px; }
+.sync-status-trigger { color:var(--muted-foreground); }
+.sync-status-panel { position:absolute;right:24px;top:calc(100% - 2px);width:320px;max-width:calc(100vw - 32px);z-index:40;padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--card);box-shadow:0 12px 35px #0002; }
+.sync-status-heading { display:flex;align-items:center;justify-content:space-between;gap:10px; }
+.sync-status-panel p { margin:12px 0;color:var(--muted-foreground);font-size:14px;line-height:1.6;overflow-wrap:anywhere; }
+.sync-status-actions { display:flex;justify-content:space-between;gap:10px;margin-top:18px; }
+.review-header { background:var(--background);border-bottom:none; }
+.review-brand-icon { background:transparent;color:var(--muted-foreground);padding:0;border-radius:0; }
+.review-brand { font-size:16px;font-weight:500; }
+@media(max-width:660px){
+ .calm-home { padding:20px 16px; }
+ .calm-home .deck-table-head,.calm-home .deck-row { grid-template-columns:minmax(0,1fr) 30px 78px 24px;gap:6px;padding-inline:8px; }
+ .calm-home .deck-study-action { font-size:14px;padding-inline:6px; }
+ .calm-home .deck-title-button { gap:8px; }
+ .calm-home .deck-icon { width:18px;min-width:18px; }
+ .app-topbar { padding-inline:16px; }
+ .sync-status-panel { right:12px; }
+}

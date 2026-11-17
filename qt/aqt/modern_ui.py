@@ -96,6 +96,22 @@ class ModernUI:
                         self.mw.moveToState("deckBrowser")
                         return
                 self._query(request_id, self._home)
+            elif action == "sync-status":
+                self._reply(
+                    request_id,
+                    {
+                        "mediaActive": self.mw.media_syncer.is_syncing(),
+                        "mediaMessage": self.mw.media_syncer.last_progress,
+                        "collectionComplete": getattr(
+                            self.mw, "_modern_collection_complete", None
+                        )
+                        == self.mw.pm.name,
+                    },
+                    generation=generation,
+                )
+            elif action == "sync-log":
+                self.mw.media_syncer.show_sync_log()
+                self._reply(request_id, True, generation=generation)
             elif action == "cards":
                 self.active_page = "cards"
                 query = str(args.get("query", ""))[:2000]

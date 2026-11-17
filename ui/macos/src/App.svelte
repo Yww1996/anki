@@ -2,6 +2,8 @@
   import { onMount } from 'svelte';
   import {
     Layers,
+    Cloud,
+    CloudCheck,
     House,
     LayoutList,
     ChartNoAxesColumn,
@@ -56,8 +58,19 @@
   let revision = 0;
   const selected = $derived(cards.find((c) => c.id === selectedId));
   const due = $derived(home.new + home.learning + home.review);
+  let chosenDeckId = $state('');
+  let syncOpen = $state(false);
+  let syncStatus = $state({mediaActive:false,mediaMessage:'',collectionComplete:false});
+  async function readSyncStatus() {
+    try { syncStatus = await command<typeof syncStatus>('sync-status'); } catch { /* Retain the last known state while native operations run. */ }
+  }
+  onMount(() => {
+    void readSyncStatus();
+    const timer = setInterval(() => { if (!document.hidden) void readSyncStatus(); }, 2000);
+    return () => clearInterval(timer);
+  });
   const currentDeck = $derived(
-    home.decks.find((deck) => deck.id === home.currentDeckId) || home.decks[0],
+    home.decks.find((deck) => deck.id === (chosenDeckId || home.currentDeckId)) || home.decks[0],
   );
   const currentDue = $derived(
     currentDeck ? currentDeck.new + currentDeck.learning + currentDeck.review : 0,
@@ -164,7 +177,7 @@
 </script>
 
 <svelte:window onkeydown={keydown} />
-<Sidebar.Provider style="--sidebar-width:15rem">
+<Sidebar.Provider style="--sidebar-width:12rem">
   <Sidebar.Root collapsible="offcanvas" class="app-sidebar">
     <Sidebar.Header class="brand-header"
       ><a
@@ -176,7 +189,7 @@
           void refresh(true);
         }}
         ><span class="brand-symbol"><Layers size={23} /></span><span class="brand-word"
-          >Anki<span class="brand-suffix">学习空间</span></span
+          >Anki</span
         ></a
       ></Sidebar.Header
     >
@@ -266,10 +279,16 @@
           }}><Search size={14} /><span>搜索卡片</span><kbd>⌘ K</kbd></button
         ><Button variant="ghost" size="icon-sm" aria-label="切换深浅色" onclick={() => act('theme')}
           >{#if home.dark}<Sun size={17} />{:else}<Moon size={17} />{/if}</Button
-        ><Button variant="ghost" size="sm" onclick={() => act('sync')}
-          ><RefreshCw size={14} />同步</Button
+        ><Button variant="ghost" class="sync-status-trigger" size="sm" aria-expanded={syncOpen} onclick={() => {syncOpen = !syncOpen; void readSyncStatus();}}
+          >{#if syncStatus.mediaActive}<RefreshCw size={15} />同步中{:else if syncStatus.collectionComplete}<CloudCheck size={15} />最近已同步{:else}<Cloud size={15} />同步{/if}</Button
         >
       </div>
+      {#if syncOpen}<section class="sync-status-panel" aria-label="同步状态">
+        <div class="sync-status-heading"><strong>同步状态</strong><Button variant="ghost" size="icon-sm" aria-label="关闭同步状态" onclick={() => (syncOpen=false)}><X size={16}/></Button></div>
+        <p aria-live="polite">{syncStatus.mediaActive ? syncStatus.mediaMessage || '正在同步媒体…' : syncStatus.collectionComplete ? '上次集合同步已完成，媒体状态可在详情中查看。' : '将卡片与学习记录同步到 AnkiWeb。'}</p>
+        {#if syncStatus.collectionComplete && syncStatus.mediaActive}<p>集合已完成，媒体仍在同步。</p>{/if}
+        <div class="sync-status-actions"><Button variant="ghost" size="sm" onclick={() => act('sync-log')}>媒体详情</Button><Button size="sm" onclick={() => {syncOpen=false;void act('sync');}}>立即同步</Button></div>
+      </section>{/if}
     </header>
     {#if error}<div class="live-error" role="alert">
         {error}<button aria-label="关闭提示" onclick={() => (error = '')}><X size={16} /></button>
@@ -370,7 +389,7 @@
         <section class="home-page calm-home page-content">
           <div class="page-heading">
             <div>
-              <h1>今日学习</h1>
+              <h1>{due ? '今天，学一点。' : '今天已完成'}</h1>
               <p class="home-summary">
                 待学 {due} 张<span aria-hidden="true"> · </span>今天已作答 {home.completed} 次
               </p>
@@ -379,17 +398,6 @@
               ><Plus size={17} /><span class="add-card-label">添加卡片</span></Button
             >
           </div>
-          {#if currentDeck}<section class="home-startbar" aria-label="当前牌组">
-              <div class="home-current-deck">
-                <span>当前牌组</span><strong title={currentDeck.name}>{currentDeck.name}</strong>
-              </div>
-              <Button
-                size="lg"
-                onclick={() => act('study', { deckId: currentDeck.id })}
-                disabled={busy}
-                >{currentDue ? '开始学习' : '查看牌组'}<ArrowRight size={17} /></Button
-              >
-            </section>{:else if busy}<p class="home-loading" role="status">正在读取牌组…</p>{/if}
           <section class="deck-section">
             <div class="section-heading">
               <div class="flex items-center gap-2">
@@ -405,14 +413,17 @@
               </div>
             </div>
             <div class="deck-table">
-              <div class="deck-table-head"><span>牌组名称</span><span>待学</span><span></span></div>
+              <div class="deck-table-head"><span>牌组名称</span><span>待学</span><span></span><span></span></div>
               {#each home.decks as deck}{@const deckDue = deck.new + deck.learning + deck.review}
-                <div class="deck-row">
+                <div class="deck-row" class:chosen={currentDeck?.id === deck.id}>
                   <button
                     class="deck-title-button"
                     title={deck.name}
-                    aria-label={`学习牌组：${deck.name}`}
-                    onclick={() => act('study', { deckId: deck.id })}
+                    aria-label={`选择牌组：${deck.name}`}
+                    aria-pressed={currentDeck?.id === deck.id}
+                    onclick={() => (chosenDeckId = deck.id)}
+                    onkeydown={(event) => {if(event.key === 'Enter'){event.preventDefault();void act('study',{deckId:deck.id});}}}
+                    ondblclick={() => act('study', { deckId: deck.id })}
                     ><DeckIcon {deck} /><span><strong>{deck.name}</strong></span></button
                   >
                   <span
@@ -420,6 +431,7 @@
                     class:blue-text={deckDue > 0}
                     class:muted-text={!deckDue}>{deckDue || '—'}</span
                   >
+                  <Button class="deck-study-action" variant={currentDeck?.id === deck.id ? 'default' : 'ghost'} size="sm" onclick={() => deckDue ? act('study', {deckId:deck.id}) : browse(deck.id)}>{deckDue ? '开始学习' : '查看卡片'}</Button>
                   <Menu.Root
                     ><Menu.Trigger class="icon-control" aria-label={`${deck.name}更多操作`}
                       ><MoreHorizontal size={19} /></Menu.Trigger
@@ -450,7 +462,7 @@
           <div class="cards-page-heading">
             <div>
               <h1>卡片管理</h1>
-              <p>整理每一张，值得记住的卡片。</p>
+              <p>搜索、预览与管理卡片。</p>
             </div>
             <div class="flex gap-2">
               <Button variant="outline" onclick={() => act('browse')}>完整管理</Button><Button

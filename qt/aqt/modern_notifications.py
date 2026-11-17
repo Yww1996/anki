@@ -104,6 +104,7 @@ class SyncCompleteNotice(QFrame):
 
 
 def show_collection_sync_complete(mw: Any, period: int = 3000) -> SyncCompleteNotice:
+    mw._modern_collection_complete = mw.pm.name
     previous = getattr(mw, "_modern_sync_notice", None)
     if previous is not None and not sip.isdeleted(previous):
         previous.dismiss()

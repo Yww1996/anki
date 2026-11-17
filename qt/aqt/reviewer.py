@@ -354,6 +354,16 @@ class Reviewer:
         self.web.allow_drops = True
         self.web.eval("_blockDefaultDragDropBehavior();")
         # show answer / ease buttons
+        from aqt.modern_ui import available, render_component
+
+        if is_mac and available():
+            render_component(
+                self.bottom.web,
+                "review-controls",
+                {"edit": tr.studying_edit(), "more": tr.studying_more()},
+                ReviewerBottomBar(self),
+            )
+            return
         self.bottom.web.stdHtml(
             self._bottomHTML(),
             css=["css/toolbar-bottom.css", "css/reviewer-bottom.css"],

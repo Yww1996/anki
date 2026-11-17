@@ -94,6 +94,9 @@ class Overview:
     ############################################################
 
     def _linkHandler(self, url: str) -> bool:
+        if url.startswith("modern:") and hasattr(self.mw.deckBrowser, "modern_ui"):
+            self.mw.deckBrowser.modern_ui.handle(url[len("modern:") :])
+            return False
         if url == "study":
             self.mw.col.startTimebox()
             self.mw.moveToState("review")
@@ -187,6 +190,15 @@ class Overview:
             shareLink = '<a class=smallLink href="review">Reviews and Updates</a>'
         else:
             shareLink = ""
+        from anki.utils import is_mac
+        from aqt.modern_ui import ModernUI, available
+
+        if is_mac and available():
+            browser = self.mw.deckBrowser
+            if not hasattr(browser, "modern_ui"):
+                browser.modern_ui = ModernUI(browser)
+            browser.modern_ui.render()
+            return
         if self.mw.col.sched._is_finished():
             self._show_finished_screen()
             return
@@ -281,6 +293,11 @@ class Overview:
     ######################################################################
 
     def _renderBottom(self) -> None:
+        from anki.utils import is_mac
+        from aqt.modern_ui import available
+
+        if is_mac and available():
+            return
         links = [
             ["O", "opts", tr.actions_options()],
         ]

@@ -84,6 +84,11 @@
   onMount(async () => {
     await refresh();
     page = home.page;
+    if (page === 'cards' && home.cardFilters) {
+      query = home.cardFilters.query;
+      deckId = home.cardFilters.deckId;
+      filter = home.cardFilters.state;
+    }
     ready = true;
   });
   $effect(() => {
@@ -110,12 +115,33 @@
       revision++;
     };
   });
+  $effect(() => {
+    if (page !== 'overview') return;
+    const timer = setInterval(() => {
+      void refresh();
+    }, 60000);
+    return () => clearInterval(timer);
+  });
   function browse(id = 'all') {
     deckId = id;
     query = '';
     page = 'cards';
   }
   function keydown(e: KeyboardEvent) {
+    if (
+      page === 'overview' &&
+      home.overview &&
+      !home.overview.finished &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      (e.key === ' ' || e.key === 'Enter') &&
+      !(e.target instanceof HTMLElement && e.target.closest('button,input,select,textarea,a'))
+    ) {
+      e.preventDefault();
+      void act('overview-action', { command: 'study' });
+      return;
+    }
     if (!(e.metaKey || e.ctrlKey)) return;
     if (e.key.toLowerCase() === 'k') {
       e.preventDefault();
@@ -194,7 +220,8 @@
           ><Sidebar.Menu
             >{#each home.decks as deck}<Sidebar.MenuItem
                 ><NavButton
-                  isActive={page === 'cards' && deckId === deck.id}
+                  isActive={(page === 'cards' && deckId === deck.id) ||
+                    (page === 'overview' && home.overview?.id === deck.id)}
                   onclick={() => browse(deck.id)}
                   class="deck-nav-button"
                   ><DeckIcon {deck} small /><span>{deck.name}</span></NavButton
@@ -224,7 +251,9 @@
     <header class="app-topbar">
       <div class="topbar-breadcrumb">
         <Sidebar.Trigger aria-label="切换侧边栏" /><span class="breadcrumb-root">学习空间</span
-        ><ChevronRight size={13} /><strong>{page === 'home' ? '今日学习' : '卡片管理'}</strong>
+        ><ChevronRight size={13} /><strong
+          >{page === 'home' ? '今日学习' : page === 'overview' ? '牌组学习' : '卡片管理'}</strong
+        >
       </div>
       <div class="topbar-actions">
         <button
@@ -244,7 +273,98 @@
         {error}<button aria-label="关闭提示" onclick={() => (error = '')}><X size={16} /></button>
       </div>{/if}
     <div class="app-scroll" aria-busy={busy}>
-      {#if page === 'home'}
+      {#if page === 'overview' && home.overview}
+        {@const deck = home.overview}
+        <section class="page-content modern-overview">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow"><BookOpen size={14} />我的牌组</div>
+              <h1>{deck.name}</h1>
+              <p>
+                {deck.finished
+                  ? '这一轮学习已完成，给记忆一点沉淀的时间。'
+                  : '按自己的节奏，开始今天的专注。'}
+              </p>
+            </div>
+            <Button variant="outline" onclick={() => act('overview-action', { command: 'opts' })}
+              ><Settings2 size={15} />牌组选项</Button
+            >
+          </div>
+          <section class="overview-focus-panel">
+            <span class="overview-emblem"
+              >{#if deck.finished}<Check size={30} />{:else}<Layers size={30} />{/if}</span
+            ><Badge variant="secondary">{deck.finished ? '本轮已完成' : '准备开始'}</Badge>
+            <h2>{deck.finished ? '每一次回忆，都有收获。' : '把熟悉，变成长久的记忆。'}</h2>
+            <div class="overview-count-grid">
+              <div>
+                <strong>{deck.new}</strong><span><i class="status-dot new"></i>未学习</span>
+              </div>
+              <div>
+                <strong>{deck.learning}</strong><span
+                  ><i class="status-dot learning"></i>学习中</span
+                >
+              </div>
+              <div>
+                <strong>{deck.review}</strong><span><i class="status-dot review"></i>待复习</span>
+              </div>
+            </div>
+            {#if !deck.finished}<Button
+                size="lg"
+                onclick={() => act('overview-action', { command: 'study' })}
+                >开始学习<ArrowRight size={16} /></Button
+              >
+              <p class="overview-shortcut">空格或 Enter 开始学习</p>{:else}<Button
+                size="lg"
+                onclick={() => {
+                  page = 'home';
+                  void refresh(true);
+                }}>返回今日学习<ArrowRight size={16} /></Button
+              >{/if}
+            {#if deck.finished && deck.learnRemaining}<p class="overview-note">
+                还有 {deck.learnRemaining} 张卡片待学习，下一张约在 {Math.max(
+                  1,
+                  Math.ceil(deck.nextLearnSeconds / 60),
+                )} 分钟后到期。
+              </p>{/if}
+            {#if deck.finished && deck.newLimitReached}<p class="overview-note">
+                已达到当前牌组的每日新卡片上限。
+              </p>{/if}{#if deck.finished && deck.reviewLimitReached}<p class="overview-note">
+                已达到当前牌组的每日复习上限。
+              </p>{/if}
+          </section>
+          <div class="overview-tools">
+            <Button variant="outline" onclick={() => browse(deck.id)}
+              ><LayoutList size={15} />查看卡片</Button
+            >{#if deck.filtered}<Button
+                variant="outline"
+                onclick={() => act('overview-action', { command: 'refresh' })}
+                ><RefreshCw size={15} />重新构建</Button
+              ><Button
+                variant="outline"
+                onclick={() => act('overview-action', { command: 'empty' })}>清空筛选牌组</Button
+              >{:else}<Button
+                variant="outline"
+                onclick={() => act('overview-action', { command: 'studymore' })}
+                ><Plus size={15} />自定义学习</Button
+              ><Button
+                variant="ghost"
+                onclick={() => act('overview-action', { command: 'description' })}
+                ><Pencil size={15} />编辑描述</Button
+              >{/if}{#if deck.buried}<Button
+                variant="outline"
+                onclick={() => act('overview-action', { command: 'unbury' })}>取消搁置</Button
+              >{/if}{#if deck.shared}<Button
+                variant="ghost"
+                onclick={() => act('overview-action', { command: 'review' })}
+                >查看共享牌组更新</Button
+              >{/if}
+          </div>
+          {#if deck.description.trim()}<section class="overview-description">
+              <h2>牌组描述</h2>
+              <p>{deck.description}</p>
+            </section>{/if}
+        </section>
+      {:else if page === 'home'}
         <section class="home-page page-content">
           <div class="page-heading">
             <div>

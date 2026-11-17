@@ -21,6 +21,23 @@ export interface Home {
   dark: boolean;
   profile: string;
   page: string;
+  cardFilters?: { query: string; deckId: string; state: string };
+  overview?: {
+    id: string;
+    name: string;
+    new: number;
+    learning: number;
+    review: number;
+    finished: boolean;
+    filtered: boolean;
+    description: string;
+    buried: boolean;
+    learnRemaining: number;
+    nextLearnSeconds: number;
+    newLimitReached: boolean;
+    reviewLimitReached: boolean;
+    shared: boolean;
+  };
 }
 export interface Card {
   id: string;

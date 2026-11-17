@@ -298,6 +298,21 @@ class Toolbar:
             left_tray_content=self._left_tray_content(),
             right_tray_content=self._right_tray_content(),
         )
+        from anki.utils import is_mac
+        from aqt.modern_ui import available, render_component
+
+        if is_mac and available():
+
+            def browse_cards() -> None:
+                browser = self.mw.deckBrowser
+                if hasattr(browser, "modern_ui"):
+                    browser.modern_ui.active_page = "cards"
+                self.mw.moveToState("deckBrowser")
+
+            self.link_handlers["browse"] = browse_cards
+            render_component(self.web, "review-header", {"links": body}, web_context)
+            self.web.adjustHeightToFit()
+            return
         self.web.stdHtml(
             body,
             css=["css/toolbar.css"],
@@ -439,6 +454,8 @@ class Toolbar:
         return False
 
     def _deckLinkHandler(self) -> None:
+        if hasattr(self.mw.deckBrowser, "modern_ui"):
+            self.mw.deckBrowser.modern_ui.active_page = "home"
         self.mw.moveToState("deckBrowser")
 
     def _studyLinkHandler(self) -> None:

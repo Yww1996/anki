@@ -89,9 +89,9 @@ class SmoothProgressBar(QProgressBar):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setPen(Qt.PenStyle.NoPen)
         night = theme_manager.night_mode
-        painter.setBrush(QColor("#363e50" if night else "#e3e7ef"))
+        painter.setBrush(QColor("#2b3240" if night else "#e9ecf2"))
         painter.drawRoundedRect(QRectF(self.rect()), 3, 3)
-        painter.setBrush(QColor("#96a4ff" if night else "#465fd9"))
+        painter.setBrush(QColor("#8196f4" if night else "#4663d8"))
         if self.maximum() == 0:
             width = self.width() * 0.28
             # Reduced motion uses a stationary indicator rather than a slow, stepped animation.

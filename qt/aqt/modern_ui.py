@@ -33,8 +33,11 @@ class ModernUI:
         self.mw = browser.mw
         self.web = browser.web
         self.active_page = "home"
+        self.page_generation = 0
+        self.card_filters: dict[str, str] = {}
 
     def render(self) -> None:
+        self.page_generation += 1
         self.web.stdHtml(
             '<div id="app"></div>' + self.web.bundledScript("modern/modern.js"),
             css=["modern/modern.css"],
@@ -45,13 +48,22 @@ class ModernUI:
         QWidget.setVisible(self.mw.toolbarWeb, False)
         QWidget.setVisible(self.mw.bottomWeb, False)
 
-    def _reply(self, request_id: int, result: Any = None, error: str = "") -> None:
+    def _reply(
+        self,
+        request_id: int,
+        result: Any = None,
+        error: str = "",
+        generation: int | None = None,
+    ) -> None:
+        if generation is not None and generation != self.page_generation:
+            return
         payload = json.dumps(
             {"id": request_id, "result": result, "error": error}, ensure_ascii=True
         )
         self.web.eval(f"window.ankiModernReceive?.({payload})")
 
     def handle(self, raw: str) -> None:
+        generation = self.page_generation
         request_id = 0
         try:
             request = json.loads(raw)
@@ -61,12 +73,19 @@ class ModernUI:
             if action == "home":
                 if args.get("navigate"):
                     self.active_page = "home"
+                    if self.mw.state != "deckBrowser":
+                        self.mw.moveToState("deckBrowser")
+                        return
                 self._query(request_id, self._home)
             elif action == "cards":
                 self.active_page = "cards"
                 query = str(args.get("query", ""))[:2000]
                 deck_id = str(args.get("deckId", "all"))
                 state = str(args.get("state", "all"))
+                self.card_filters = {"query": query, "deckId": deck_id, "state": state}
+                if self.mw.state != "deckBrowser":
+                    self.mw.moveToState("deckBrowser")
+                    return
                 self._query(
                     request_id, lambda col: self._cards(col, query, deck_id, state)
                 )
@@ -76,20 +95,36 @@ class ModernUI:
                     self.browser.set_current_deck(DeckId(int(deck_id)))
                 else:
                     self.mw.onOverview()
-                self._reply(request_id, True)
+                self._reply(request_id, True, generation=generation)
+            elif action == "overview-action":
+                allowed = {
+                    "study",
+                    "opts",
+                    "studymore",
+                    "customStudy",
+                    "unbury",
+                    "description",
+                    "refresh",
+                    "empty",
+                    "review",
+                }
+                if args.get("command") not in allowed:
+                    raise ValueError("未知操作")
+                self.mw.overview._linkHandler(args["command"])
+                self._reply(request_id, True, generation=generation)
             elif action == "edit":
                 import aqt
 
                 card_id = CardId(int(args["id"]))
                 browser = aqt.dialogs.open("Browser", self.mw)
                 browser.search_for(f"cid:{card_id}")
-                self._reply(request_id, True)
+                self._reply(request_id, True, generation=generation)
             elif action == "rename":
                 self.browser._rename(DeckId(int(args["deckId"])))
-                self._reply(request_id, True)
+                self._reply(request_id, True, generation=generation)
             elif action == "options":
                 self.browser._options(DeckId(int(args["deckId"])))
-                self._reply(request_id, True)
+                self._reply(request_id, True, generation=generation)
             elif action == "theme":
                 from aqt.theme import Theme
 
@@ -97,7 +132,7 @@ class ModernUI:
                     Theme.LIGHT if theme_manager.night_mode else Theme.DARK
                 )
                 theme_manager.apply_style()
-                self._reply(request_id, True)
+                self._reply(request_id, True, generation=generation)
             else:
                 actions = {
                     "add": self.mw.onAddCard,
@@ -111,17 +146,22 @@ class ModernUI:
                 if action not in actions:
                     raise ValueError("未知操作")
                 actions[action]()
-                self._reply(request_id, True)
+                self._reply(request_id, True, generation=generation)
         except Exception as error:
-            self._reply(request_id, error=str(error))
+            self._reply(request_id, error=str(error), generation=generation)
 
     def _query(self, request_id: int, operation: Any) -> None:
+        generation = self.page_generation
         QueryOp(
             parent=self.mw,
             op=operation,
-            success=lambda result: self._reply(request_id, result),
+            success=lambda result: self._reply(
+                request_id, result, generation=generation
+            ),
         ).failure(
-            lambda error: self._reply(request_id, error=str(error))
+            lambda error: self._reply(
+                request_id, error=str(error), generation=generation
+            )
         ).run_in_background()
 
     def _home(self, col: Collection) -> dict[str, Any]:
@@ -170,7 +210,30 @@ class ModernUI:
             "total": col.card_count(),
             "dark": theme_manager.night_mode,
             "profile": self.mw.pm.name,
-            "page": self.active_page,
+            "page": "overview" if self.mw.state == "overview" else self.active_page,
+            "cardFilters": self.card_filters,
+            "overview": self._overview(col) if self.mw.state == "overview" else None,
+        }
+
+    def _overview(self, col: Collection) -> dict[str, Any]:
+        deck = col.decks.current()
+        counts = col.sched.counts()
+        info = col.sched.congratulations_info()
+        return {
+            "id": str(deck["id"]),
+            "name": deck["name"],
+            "new": counts[0],
+            "learning": counts[1],
+            "review": counts[2],
+            "finished": col.sched._is_finished(),
+            "filtered": bool(deck["dyn"]),
+            "description": strip_html_media(self.mw.overview._desc(deck)),
+            "buried": info.have_sched_buried or info.have_user_buried,
+            "learnRemaining": info.learn_remaining,
+            "nextLearnSeconds": info.secs_until_next_learn,
+            "newLimitReached": info.new_remaining,
+            "reviewLimitReached": info.review_remaining,
+            "shared": bool(deck.get("sharedFrom")),
         }
 
     def _cards(
@@ -293,3 +356,21 @@ def show_sync_login(mw: Any, callback: Any, username: str, password: str) -> Non
     )
     qconnect(dialog.finished, finished)
     dialog.open()
+
+
+def render_component(
+    web: Any, mode: str, metadata: dict[str, Any], context: Any
+) -> None:
+    import html
+
+    context.uses_modern_ui = True
+    metadata = {**metadata, "dark": theme_manager.night_mode}
+    encoded = html.escape(json.dumps(metadata, ensure_ascii=True), quote=True)
+    web.stdHtml(
+        f'<div id="app" data-mode="{mode}" data-meta="{encoded}"></div>'
+        + web.bundledScript("modern/modern.js"),
+        css=["modern/modern.css"],
+        js=[],
+        default_css=False,
+        context=context,
+    )

@@ -777,7 +777,7 @@ class AnkiQt(QMainWindow):
         self.state = state
         if is_mac and hasattr(self.deckBrowser, "modern_ui"):
             for bar in (self.toolbarWeb, self.bottomWeb):
-                QWidget.setVisible(bar, state != "deckBrowser")
+                QWidget.setVisible(bar, state not in {"deckBrowser", "overview"})
         gui_hooks.state_will_change(state, oldState)
         getattr(self, f"_{state}State", lambda *_: None)(oldState, *args)
         if state != "resetRequired":
@@ -1181,7 +1181,7 @@ title="{}" {}>{}</button>""".format(
     def setupKeys(self) -> None:
         globalShortcuts = [
             ("Ctrl+:", show_debug_console),
-            ("d", lambda: self.moveToState("deckBrowser")),
+            ("d", self.toolbar._deckLinkHandler),
             ("s", self.onStudyKey),
             ("a", self.onAddCard),
             ("b", self.onBrowse),

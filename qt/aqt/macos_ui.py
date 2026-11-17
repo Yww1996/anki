@@ -13,13 +13,13 @@ if TYPE_CHECKING:
 
 def widget_styles(night: bool, down_icon: str, up_icon: str) -> str:
     if night:
-        canvas, surface, text = "#202022", "#2b2b2e", "#f5f5f7"
-        secondary, border, hover = "#aaaab1", "#48484c", "#363639"
-        selection, accent = "#263e5d", "#75b5ff"
+        canvas, surface, text = "#151820", "#1d222d", "#e1e6ef"
+        secondary, border, hover = "#8994a8", "#2b3240", "#29334e"
+        selection, accent = "#2a3555", "#8196f4"
     else:
-        canvas, surface, text = "#f5f5f7", "#ffffff", "#1d1d1f"
-        secondary, border, hover = "#65656b", "#dcdce0", "#ededf0"
-        selection, accent = "#e8f1fc", "#0067d9"
+        canvas, surface, text = "#fbfcfe", "#ffffff", "#252b38"
+        secondary, border, hover = "#6b7585", "#e9ecf2", "#f0f3f9"
+        selection, accent = "#eef2fc", "#4663d8"
 
     # Keep platform menu bars, checkbox/radio indicators, scrollbars, and
     # window decorations native. Scope styling to ordinary application controls.
@@ -40,8 +40,8 @@ QPushButton:pressed, QPushButton:checked {{ background-color: {selection}; }}
 QPushButton:default {{
     border-color: {accent};
 }}
-QDialogButtonBox QPushButton:default {{ background-color: #007aff; color: white; }}
-QDialogButtonBox QPushButton:default:hover {{ background-color: #0069df; }}
+QDialogButtonBox QPushButton:default {{ background-color: {accent}; color: {"#151a2a" if night else "#ffffff"}; }}
+QDialogButtonBox QPushButton:default:hover {{ background-color: {"#95a6ff" if night else "#3e57c2"}; }}
 QPushButton:focus {{ border: 1px solid {accent}; }}
 QPushButton:disabled {{ color: {secondary}; background-color: {canvas}; }}
 QPushButton:flat {{ border: none; background: transparent; }}
@@ -182,14 +182,16 @@ def web_styles() -> str:
     # Card bodies always carry .card; never restyle their content or templates.
     return """
 body.isMac:not(.card) {
-    --mac-background: #f5f5f7;
+    --mac-background: #fbfcfe;
     --mac-surface: #ffffff;
-    --mac-text: #1d1d1f;
-    --mac-secondary: #65656b;
-    --mac-border: #dcdce0;
-    --mac-hover: #ededf0;
-    --mac-selection: #e8f1fc;
-    --mac-accent: #0067d9;
+    --mac-text: #252b38;
+    --mac-secondary: #6b7585;
+    --mac-border: #e9ecf2;
+    --mac-hover: #f0f3f9;
+    --mac-selection: #eef2fc;
+    --mac-accent: #4663d8;
+    --mac-accent-contrast: #ffffff;
+    --mac-accent-hover: #3e57c2;
     --canvas: var(--mac-background);
     --canvas-elevated: var(--mac-surface);
     --canvas-inset: var(--mac-surface);
@@ -215,14 +217,16 @@ body.isMac:not(.card) {
     -webkit-font-smoothing: antialiased;
 }
 body.isMac.nightMode:not(.card) {
-    --mac-background: #202022;
-    --mac-surface: #2b2b2e;
-    --mac-text: #f5f5f7;
-    --mac-secondary: #aaaab1;
-    --mac-border: #48484c;
-    --mac-hover: #363639;
-    --mac-selection: #263e5d;
-    --mac-accent: #75b5ff;
+    --mac-background: #151820;
+    --mac-surface: #1d222d;
+    --mac-text: #e1e6ef;
+    --mac-secondary: #8994a8;
+    --mac-border: #2b3240;
+    --mac-hover: #29334e;
+    --mac-selection: #2a3555;
+    --mac-accent: #8196f4;
+    --mac-accent-contrast: #151a2a;
+    --mac-accent-hover: #95a6ff;
 }
 body.isMac:not(.card) :is(button, input, select) { font-family: inherit; }
 body.isMac:not(.card) :is(button, .btn) {
@@ -240,12 +244,12 @@ body.isMac:not(.card) button:not(.btn, .btn-close, .icon-button, .item-card):hov
     background: var(--mac-hover);
 }
 body.isMac:not(.card) :is(.btn-primary, .btn-primary:hover) {
-    --bs-btn-bg: #007aff;
-    --bs-btn-border-color: #007aff;
-    --bs-btn-hover-bg: #0069df;
-    --bs-btn-hover-border-color: #0069df;
-    --bs-btn-active-bg: #0069df;
-    --bs-btn-color: white;
+    --bs-btn-bg: var(--mac-accent);
+    --bs-btn-border-color: var(--mac-accent);
+    --bs-btn-hover-bg: var(--mac-accent-hover);
+    --bs-btn-hover-border-color: var(--mac-accent-hover);
+    --bs-btn-active-bg: var(--mac-accent-hover);
+    --bs-btn-color: var(--mac-accent-contrast);
 }
 body.isMac:not(.card) :is(.form-control, .form-select, input[type=text], input[type=number], select) {
     background-color: var(--mac-surface);
@@ -355,18 +359,18 @@ def modern_progress_styles(night: bool) -> str:
     """Match progress sheets to the Svelte shell without changing cancellation."""
     if night:
         surface, text, muted, border, accent = (
-            "#202633",
-            "#e9edf5",
-            "#9ca7bb",
-            "#363e50",
-            "#96a4ff",
+            "#1d222d",
+            "#e1e6ef",
+            "#8994a8",
+            "#2b3240",
+            "#8196f4",
         )
     else:
         surface, text, muted, border, accent = (
             "#ffffff",
             "#252c3d",
             "#6b7585",
-            "#e3e7ef",
+            "#e9ecf2",
             "#465fd9",
         )
     return f"""

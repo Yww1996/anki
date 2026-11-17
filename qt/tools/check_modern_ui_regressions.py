@@ -28,7 +28,7 @@ from aqt.qt import QTimer
 from aqt.theme import Theme, theme_manager
 
 
-def run() -> int:
+def run(check_type=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fixture-base", type=Path, required=True)
     parser.add_argument("--profile", required=True)
@@ -64,7 +64,7 @@ def run() -> int:
             exec=False,
         )
         assert app is not None, "The test must run in its own instance"
-        tests = RegressionChecks(app, options.artifacts)
+        tests = (check_type or RegressionChecks)(app, options.artifacts)
         QTimer.singleShot(500, tests.start)
         QTimer.singleShot(90000, tests.timeout)
         app.exec()

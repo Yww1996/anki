@@ -382,3 +382,19 @@ QProgressBar {{ border: none; border-radius: 3px; min-height: 6px;
     max-height: 6px; background: {border}; color: {muted}; }}
 QProgressBar::chunk {{ background: {accent}; border-radius: 3px; }}
 """
+
+
+def notification_styles(night: bool) -> str:
+    if night:
+        surface, text, border = "#232938", "#e1e6ef", "#2b3240"
+        success, tint, muted, hover = "#7cc9a2", "#243f37", "#8994a8", "#30394b"
+    else:
+        surface, text, border = "#ffffff", "#252b38", "#e9ecf2"
+        success, tint, muted, hover = "#218566", "#e9f5ee", "#6b7585", "#f0f3f9"
+    return f"""
+QFrame#modernSyncNotice {{ background: {surface}; border: 1px solid {border}; border-radius: 11px; }}
+QFrame#modernSyncNotice QLabel {{ color: {text}; background: transparent; border: none; font-size: 13px; }}
+QFrame#modernSyncNotice QLabel#noticeIcon {{ color: {success}; background: {tint}; border-radius: 12px; font-size: 17px; }}
+QFrame#modernSyncNotice QPushButton#noticeClose {{ min-height: 0; min-width: 0; padding: 0; border: none; border-radius: 6px; color: {muted}; background: transparent; font-size: 18px; }}
+QFrame#modernSyncNotice QPushButton#noticeClose:hover {{ background: {hover}; color: {text}; }}
+"""

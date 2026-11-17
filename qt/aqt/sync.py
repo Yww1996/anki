@@ -14,7 +14,7 @@ from anki.errors import Interrupted, SyncError, SyncErrorKind
 from anki.lang import without_unicode_isolation
 from anki.sync import SyncOutput, SyncStatus
 from anki.sync_pb2 import SyncAuth
-from anki.utils import plat_desc
+from anki.utils import is_mac, plat_desc
 from aqt import gui_hooks
 from aqt.qt import (
     QDialog,
@@ -119,7 +119,12 @@ def sync_collection(mw: aqt.main.AnkiQt, on_done: Callable[[], None]) -> None:
         if out.server_message:
             showText(out.server_message, parent=mw, type="rich")
         if out.required == out.NO_CHANGES:
-            tooltip(parent=mw, msg=tr.sync_collection_complete())
+            if is_mac:
+                from aqt.modern_notifications import show_collection_sync_complete
+
+                show_collection_sync_complete(mw)
+            else:
+                tooltip(parent=mw, msg=tr.sync_collection_complete())
             # all done; track media progress
             mw.media_syncer.start_monitoring()
             return on_done()

@@ -218,11 +218,12 @@ class ProgressManager:
             return
 
         assert self._win is not None
-        if label:
+        if label and label != self._win.form.label.text():
             self._win.form.label.setText(label)
 
         self._max = max or 0
-        self._win.form.progressBar.setMaximum(self._max)
+        if self._win.form.progressBar.maximum() != self._max:
+            self._win.form.progressBar.setMaximum(self._max)
         if self._max:
             self._counter = value if value is not None else (self._counter + 1)
             self._win.form.progressBar.setValue(self._counter)
@@ -333,7 +334,7 @@ class ProgressManager:
 
     def set_title(self, title: str) -> None:
         win = self._win
-        if win:
+        if win and win.windowTitle() != title:
             win.setWindowTitle(title)
 
 
@@ -356,8 +357,17 @@ class ProgressDialog(QDialog):
             self.setMinimumWidth(420)
         self._closingDown = False
         self.wantCancel = False
-        # required for smooth progress bars
-        self.form.progressBar.setStyleSheet("QProgressBar::chunk { width: 1px; }")
+        if is_mac:
+            from aqt.modern_progress import SmoothProgressBar
+
+            old_bar = self.form.progressBar
+            bar = SmoothProgressBar(old_bar, aqt.mw.pm.reduce_motion())
+            self.layout().replaceWidget(old_bar, bar)
+            old_bar.hide()
+            old_bar.deleteLater()
+            self.form.progressBar = bar
+        else:
+            self.form.progressBar.setStyleSheet("QProgressBar::chunk { width: 1px; }")
 
     def cancel(self) -> None:
         self._closingDown = True

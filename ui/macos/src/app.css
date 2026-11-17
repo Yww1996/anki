@@ -2494,3 +2494,180 @@ h1 {
   color: var(--muted-foreground);
   margin-top: 20px;
 }
+.preferences-shell {
+  height: 100dvh;
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.preferences-nav {
+  background: var(--sidebar);
+  border-right: 1px solid var(--border);
+  padding: 30px 16px;
+  display: flex;
+  flex-direction: column;
+}
+.preferences-brand {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-weight: 650;
+  font-size: 17px;
+  padding: 0 12px 28px;
+  color: var(--foreground);
+}
+.preferences-nav nav {
+  display: grid;
+  gap: 5px;
+}
+.preferences-nav nav button {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+.preferences-nav nav button.active {
+  background: var(--sidebar-accent);
+  color: var(--primary);
+  font-weight: 600;
+}
+.preferences-nav > p {
+  margin-top: auto;
+  padding: 24px 12px 0;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  line-height: 1.8;
+}
+.preferences-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+.preferences-main > header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted-foreground);
+  background: var(--card);
+}
+.preferences-main > header strong {
+  color: var(--foreground);
+  font-weight: 500;
+}
+.preferences-content {
+  overflow: auto;
+  flex: 1;
+  padding: 30px 30px 20px;
+}
+.preferences-heading h1 {
+  font-size: 25px;
+  font-weight: 650;
+  letter-spacing: -0.5px;
+}
+.preferences-heading p {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  margin-top: 7px;
+}
+.preferences-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted-foreground);
+  margin: 23px 0;
+}
+.preferences-search input {
+  background: var(--card);
+}
+.preferences-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  padding: 4px 20px;
+  margin: 16px 0;
+}
+.preferences-card h2 {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 15px 0 12px;
+}
+.preferences-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+  padding: 16px 0;
+}
+.preferences-row:first-child {
+  border-top: none;
+}
+.preferences-row-label {
+  flex: 1;
+  min-width: 0;
+}
+.preferences-row-label label {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.preferences-row-label p {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+  margin-top: 4px;
+}
+.preferences-row-control {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 58%;
+}
+.preferences-row-control select {
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--background);
+  padding: 7px 10px;
+  max-width: 220px;
+  font-size: 12px;
+  color: var(--foreground);
+}
+.preferences-number {
+  width: 88px;
+}
+.preferences-suffix {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+.preferences-row.stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+.preferences-row.stacked .preferences-row-control {
+  max-width: 100%;
+  width: 100%;
+}
+.preferences-explanation {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  line-height: 1.8;
+  padding: 12px 0;
+}
+.preferences-main > footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 28px;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+}

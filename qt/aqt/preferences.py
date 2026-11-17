@@ -79,6 +79,12 @@ class Preferences(QDialog):
                 min(720, screen.availableGeometry().height() - 80) if screen else 720
             )
             self.resize(760, height)
+            from aqt.modern_ui import available
+
+            if available():
+                from aqt.modern_preferences import ModernPreferences
+
+                self.modern_preferences = ModernPreferences(self)
         self.show()
 
     def _setup_webview(self) -> None:
@@ -126,6 +132,8 @@ class Preferences(QDialog):
             self.update_profile()
             self.update_global()
             self.mw.pm.save()
+            if hasattr(self, "modern_preferences"):
+                self.modern_preferences.web.cleanup()
             self.done(0)
             aqt.dialogs.markClosed("Preferences")
 

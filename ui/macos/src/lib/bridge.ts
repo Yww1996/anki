@@ -34,7 +34,7 @@ export interface Card {
 }
 declare global {
   interface Window {
-    pycmd: (command: string) => void;
+    pycmd: (command: string, callback?: (result: any) => void) => void;
     ankiModernReceive: (message: { id: number; result: any; error: string }) => void;
   }
 }

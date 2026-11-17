@@ -30,3 +30,7 @@ PYTHONPATH=<built-runtime> python qt/tools/check_modern_ui_regressions.py \
 必须使用人工测试资料库。检查器复制到临时目录，移除复制资料的同步凭据并以安全模式启动；不打开原资料库。覆盖设置文字/数字切页后的显示与保存、含特殊字符的父牌组及子/孙牌组查询、400px 原生窗口中各按钮的真实边界、三种队列名称与颜色、原调度器评分、桌面宽度恢复，以及模拟扩展的正文、脚本、渲染顺序和底栏按钮。结果和截图写入指定输出目录。
 
 同样的参数可用于 `qt/tools/check_readability.py`，检查三种窗口大小下的字号、精简首页、首屏学习入口与按钮边界，并保存截图。
+
+## macOS 应用图标
+
+已确认的主图为 `assets/app-icon.png`，透明画布上的蓝色圆角底、白色卡片和蓝色星形。运行 `python3 ui/macos/scripts/export-app-icon.py`（仓库根目录、macOS）使用系统工具导出 16–1024 像素的 ICNS，写入 `qt/installer/app/resources/anki.icns`。其他平台的图标保持原样。

@@ -12,6 +12,7 @@ import aqt
 import aqt.operations
 from anki.collection import Collection, OpChanges
 from anki.decks import DeckCollapseScope, DeckId, DeckTreeNode
+from anki.utils import is_mac
 from aqt import AnkiQt, gui_hooks
 from aqt.deckoptions import display_options_for_deck_id
 from aqt.operations import QueryOp
@@ -185,8 +186,14 @@ class DeckBrowser:
             stats=self._renderStats(),
         )
         gui_hooks.deck_browser_will_render_content(self, content)
+        heading = (
+            f'<h1 class="macos-deck-heading">{html.escape(tr.actions_decks())}</h1>'
+            if is_mac
+            else ""
+        )
         self.web.stdHtml(
             self._v1_upgrade_message(data.sched_upgrade_required)
+            + heading
             + self._body % content.__dict__,
             css=["css/deckbrowser.css"],
             js=[

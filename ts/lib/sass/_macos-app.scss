@@ -1,0 +1,380 @@
+/* Copyright: Anki Software, LLC and contributors
+ * License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html */
+
+// App chrome only. Do not include this in reviewer.css or card templates.
+@mixin surface {
+    body.isMac {
+        --mac-background: #f5f5f7;
+        --mac-surface: #fff;
+        --mac-text: #1d1d1f;
+        --mac-secondary: #65656b;
+        --mac-separator: rgba(60, 60, 67, 0.14);
+        --mac-hover: rgba(0, 0, 0, 0.035);
+        --mac-selection: #e8f1fc;
+        --mac-accent: #0067d9;
+        --mac-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        --canvas: var(--mac-background);
+        --fg: var(--mac-text);
+        --fg-link: var(--mac-accent);
+        color: var(--mac-text);
+        background: var(--mac-background);
+        font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+        -webkit-font-smoothing: antialiased;
+
+        &.nightMode {
+            --mac-background: #202022;
+            --mac-surface: #2b2b2e;
+            --mac-text: #f5f5f7;
+            --mac-secondary: #aaaab1;
+            --mac-separator: rgba(235, 235, 245, 0.14);
+            --mac-hover: rgba(255, 255, 255, 0.05);
+            --mac-selection: #263e5d;
+            --mac-accent: #75b5ff;
+            --mac-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        a:focus-visible,
+        button:focus-visible {
+            outline: 3px solid var(--mac-accent) !important;
+            outline-offset: 3px;
+        }
+    }
+}
+
+@mixin buttons {
+    body.isMac button {
+        box-sizing: border-box;
+        min-height: 30px;
+        padding: 5px 14px;
+        border: 1px solid var(--mac-separator);
+        border-radius: 7px;
+        color: var(--mac-text);
+        background: var(--mac-surface);
+        box-shadow: var(--mac-shadow);
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.4;
+        transition: none;
+
+        &:hover {
+            background: var(--mac-selection);
+            border-color: var(--mac-separator);
+            box-shadow: var(--mac-shadow);
+        }
+
+        &:active {
+            background: var(--mac-hover);
+        }
+    }
+}
+
+@mixin toolbar {
+    @include surface;
+
+    body.isMac {
+        margin: 0;
+        padding: 0;
+
+        .header {
+            box-sizing: border-box;
+            grid-template-columns: minmax(0, 1fr) max-content minmax(0, 1fr);
+            align-items: center;
+            min-height: 58px;
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--mac-separator);
+        }
+
+        .header .toolbar {
+            display: flex;
+            gap: 4px;
+            padding: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            backdrop-filter: none;
+            transition: none;
+        }
+
+        .header .toolbar .hitem {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 30px;
+            padding: 3px 14px;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            color: var(--mac-text);
+            background: transparent;
+            box-shadow: none;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+
+            &:hover {
+                background: var(--mac-hover);
+            }
+
+            &:active {
+                background: var(--mac-selection);
+            }
+        }
+
+        // Keep sync warnings/spinner and extension trays owned by upstream.
+        .left-tray,
+        .right-tray {
+            align-self: center;
+            align-items: center;
+        }
+
+        @media (max-width: 540px) {
+            .header {
+                padding: 8px;
+                grid-template-columns: auto;
+                justify-items: center;
+                gap: 4px;
+            }
+
+            .left-tray,
+            .right-tray {
+                justify-self: center;
+            }
+
+            .header .toolbar .hitem {
+                padding-inline: 9px;
+            }
+        }
+    }
+}
+
+@mixin deck-browser {
+    @include surface;
+
+    body.isMac {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 32px clamp(16px, 5vw, 48px) 24px;
+
+        .macos-deck-heading {
+            max-width: 880px;
+            margin: 0 auto 22px;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.6px;
+            text-align: start;
+        }
+
+        > center > table {
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 880px;
+            padding: 8px 12px 12px;
+            border: 1px solid var(--mac-separator);
+            border-radius: 12px;
+            background: var(--mac-surface);
+            box-shadow: var(--mac-shadow);
+
+            &:hover {
+                box-shadow: var(--mac-shadow);
+            }
+        }
+
+        th {
+            padding: 12px 10px;
+            border-color: var(--mac-separator);
+            color: var(--mac-secondary);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        tr.deck td {
+            height: 42px;
+            padding: 3px 10px;
+            border: 0;
+            font-size: 14px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        tr.deck:hover td {
+            background: var(--mac-hover);
+        }
+
+        tr.deck.current td {
+            background: var(--mac-selection);
+        }
+
+        tr.deck:focus-within td {
+            background: var(--mac-selection);
+        }
+
+        // Preserve drop targets, indentation and the existing deck links.
+        tr.drag-hover td {
+            border-bottom: 2px solid var(--mac-accent);
+        }
+
+        .decktd {
+            min-width: 8em;
+            max-width: calc(100vw - 280px);
+        }
+
+        a.deck {
+            color: var(--mac-text);
+            line-height: 1.6;
+        }
+
+        .count {
+            min-width: 3em;
+        }
+
+        .zero-count {
+            color: var(--mac-secondary);
+        }
+
+        .gears {
+            visibility: visible;
+            opacity: 0.55;
+            padding: 6px;
+        }
+
+        #studiedToday {
+            max-width: 840px;
+            margin: 18px auto 0;
+            color: var(--mac-secondary);
+            font-size: 13px;
+            line-height: 1.7;
+            text-align: start;
+        }
+
+        @media (max-width: 540px) {
+            padding: 20px 12px;
+
+            > center > table {
+                padding: 4px;
+            }
+
+            th,
+            tr.deck td {
+                padding-inline: 5px;
+            }
+
+            .decktd {
+                min-width: 5em;
+            }
+        }
+    }
+}
+
+@mixin overview {
+    @include surface;
+    @include buttons;
+
+    body.isMac {
+        margin: 0;
+        padding: 40px 24px;
+
+        > center {
+            box-sizing: border-box;
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 32px 24px;
+            border: 1px solid var(--mac-separator);
+            border-radius: 14px;
+            background: var(--mac-surface);
+            box-shadow: var(--mac-shadow);
+        }
+
+        h3 {
+            margin: 0 0 16px;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            overflow-wrap: anywhere;
+        }
+
+        .descfont {
+            color: var(--mac-secondary);
+            line-height: 1.7;
+        }
+
+        > center > table {
+            width: 100%;
+            max-width: 400px;
+            font-size: 14px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #study {
+            min-height: 34px;
+            padding: 6px 20px;
+            color: #fff;
+            background: #007aff;
+            border-color: rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            white-space: normal;
+
+            &:hover {
+                background: #0069df;
+            }
+        }
+    }
+}
+
+@mixin bottom-bar {
+    @include surface;
+    @include buttons;
+
+    body.isMac {
+        #outer {
+            border-top: 1px solid var(--mac-separator);
+        }
+
+        #header {
+            padding: 12px 8px;
+        }
+    }
+}
+
+@mixin reviewer-bottom {
+    @include surface;
+    @include buttons;
+
+    body.isMac {
+        #outer {
+            border-top: 1px solid var(--mac-separator);
+        }
+
+        button {
+            margin: 10px 5px;
+            min-width: 72px;
+        }
+
+        #ansbut {
+            min-width: 150px;
+            background: #007aff;
+            color: #fff;
+            border-color: transparent;
+        }
+
+        #defease {
+            border-color: var(--mac-accent);
+        }
+
+        .stattxt,
+        .nobold {
+            color: var(--mac-secondary);
+            font-size: 11px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        @media (max-width: 540px) {
+            button {
+                min-width: 54px;
+                margin-inline: 3px;
+                padding-inline: 8px;
+            }
+        }
+    }
+}

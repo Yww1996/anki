@@ -1,5 +1,6 @@
 /* Copyright: Ankitects Pty Ltd and contributors
  * License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html */
+@use "../../../../../ts/lib/sass/macos-app";
 @use "../../../../../ts/lib/sass/root-vars";
 @use "../../../../../ts/lib/sass/vars" as *;
 @use "../../../../../ts/lib/sass/card-counts";
@@ -155,3 +156,5 @@ tr:hover:not(.top-level-drag-row) {
 #studiedToday {
     margin: 2em 0;
 }
+
+@include macos-app.deck-browser;

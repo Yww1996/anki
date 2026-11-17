@@ -104,6 +104,9 @@ class DeckBrowser:
     ##########################################################################
 
     def _linkHandler(self, url: str) -> Any:
+        if url.startswith("modern:") and hasattr(self, "modern_ui"):
+            self.modern_ui.handle(url[len("modern:"):])
+            return False
         if ":" in url:
             (cmd, arg) = url.split(":", 1)
         else:
@@ -180,6 +183,15 @@ class DeckBrowser:
             self.web.evalWithCallback("window.pageYOffset", self.__renderPage)
 
     def __renderPage(self, offset: int | None) -> None:
+        if is_mac:
+            from aqt.modern_ui import ModernUI, available
+
+            if available():
+                if not hasattr(self, "modern_ui"):
+                    self.modern_ui = ModernUI(self)
+                self.modern_ui.render()
+                gui_hooks.deck_browser_did_render(self)
+                return
         data = self._render_data
         content = DeckBrowserContent(
             tree=self._renderDeckTree(data.tree),

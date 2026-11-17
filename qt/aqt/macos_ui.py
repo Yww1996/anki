@@ -231,12 +231,12 @@ body.isMac:not(.card) :is(button, .btn) {
     font-weight: 500;
     transition-duration: 0.1s;
 }
-body.isMac:not(.card) button:not(.btn, .btn-close, .icon-button) {
+body.isMac:not(.card) button:not(.btn, .btn-close, .icon-button, .item-card) {
     background: var(--mac-surface);
     color: var(--mac-text);
     border-color: var(--mac-border);
 }
-body.isMac:not(.card) button:not(.btn, .btn-close, .icon-button):hover {
+body.isMac:not(.card) button:not(.btn, .btn-close, .icon-button, .item-card):hover {
     background: var(--mac-hover);
 }
 body.isMac:not(.card) :is(.btn-primary, .btn-primary:hover) {

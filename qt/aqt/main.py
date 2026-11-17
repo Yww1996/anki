@@ -775,6 +775,9 @@ class AnkiQt(QMainWindow):
             cleanup(state)
         self.clearStateShortcuts()
         self.state = state
+        if is_mac and hasattr(self.deckBrowser, "modern_ui"):
+            for bar in (self.toolbarWeb, self.bottomWeb):
+                QWidget.setVisible(bar, state != "deckBrowser")
         gui_hooks.state_will_change(state, oldState)
         getattr(self, f"_{state}State", lambda *_: None)(oldState, *args)
         if state != "resetRequired":

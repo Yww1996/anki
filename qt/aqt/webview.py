@@ -738,7 +738,9 @@ html {{ {font} }}
             csstxt += f"<style>{self.standard_css()}</style>"
 
         csstxt += "\n".join(self.bundledCSS(fname) for fname in web_content.css)
-        if app_style := self._macos_app_css():
+        if not getattr(context, "uses_modern_ui", False) and (
+            app_style := self._macos_app_css()
+        ):
             csstxt += f"<style>{app_style}</style>"
         jstxt = "\n".join(self.bundledScript(fname) for fname in web_content.js)
 

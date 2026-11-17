@@ -108,6 +108,13 @@ fn build_generated_sources(build: &mut Build) -> Result<()> {
 }
 
 fn build_data_folder(build: &mut Build) -> Result<()> {
+    build.add_action(
+        "qt:aqt:data:web:modern",
+        CopyFiles {
+            inputs: inputs![glob!["qt/aqt/data/web/modern/*"]],
+            output_folder: "qt/_aqt/data/web/modern",
+        },
+    )?;
     build_css(build)?;
     build_imgs(build)?;
     build_js(build)?;

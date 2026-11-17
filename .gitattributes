@@ -1,3 +1,5 @@
 * text=auto eol=lf
 *.ftl -linguist-detectable
 cargo/remote/* linguist-vendored
+# Generated bundles can contain significant trailing spaces in template literals.
+qt/aqt/data/web/modern/* linguist-generated whitespace=-blank-at-eol

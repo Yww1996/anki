@@ -697,6 +697,16 @@ html {{ {font} }}
 :root[class*=night-mode] {{ --canvas: {colors.CANVAS["dark"]} }}
 """
 
+    def _macos_app_css(self) -> str:
+        if is_mac and self._kind not in (
+            AnkiWebViewKind.PREVIEWER,
+            AnkiWebViewKind.CARD_LAYOUT,
+        ):
+            from aqt.macos_ui import web_styles
+
+            return web_styles()
+        return ""
+
     def stdHtml(
         self,
         body: str,
@@ -728,6 +738,8 @@ html {{ {font} }}
             csstxt += f"<style>{self.standard_css()}</style>"
 
         csstxt += "\n".join(self.bundledCSS(fname) for fname in web_content.css)
+        if app_style := self._macos_app_css():
+            csstxt += f"<style>{app_style}</style>"
         jstxt = "\n".join(self.bundledScript(fname) for fname in web_content.js)
 
         from aqt import mw
@@ -915,7 +927,7 @@ html {{ {font} }}
 
     def add_dynamic_styling_and_props_then_show(self) -> None:
         "Add dynamic styling, title, set platform-specific body classes and reveal."
-        css = self.standard_css()
+        css = self.standard_css() + self._macos_app_css()
         body_classes = theme_manager.body_class().split(" ")
 
         def after_injection(arg: Any) -> None:

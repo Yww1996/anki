@@ -272,6 +272,15 @@ class ThemeManager:
             # Qt 6.10+ reads this from the system's theme
             buf += f"QTableView {{ gridline-color: {self.var(colors.BORDER_SUBTLE)}; }}"
 
+        if is_mac:
+            from aqt.macos_ui import widget_styles
+
+            buf += widget_styles(
+                self.night_mode,
+                self.themed_icon("mdi:chevron-down"),
+                self.themed_icon("mdi:chevron-up"),
+            )
+
         # allow addons to modify the styling
         buf = gui_hooks.style_did_init(buf)
 

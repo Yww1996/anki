@@ -70,6 +70,15 @@ class Preferences(QDialog):
         self.setup_profile()
         self.setup_global()
         self.setup_configurable_answer_keys()
+        if is_mac:
+            from aqt.macos_ui import prepare_preferences_tabs
+
+            prepare_preferences_tabs(self.form.tabWidget)
+            screen = self.screen()
+            height = (
+                min(720, screen.availableGeometry().height() - 80) if screen else 720
+            )
+            self.resize(760, height)
         self.show()
 
     def _setup_webview(self) -> None:
